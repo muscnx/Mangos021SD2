@@ -237,6 +237,11 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit* pVictim, SpellAuraHolder* holder, S
 {
     SpellEntry const* spellProto = holder->GetSpellProto();
 
+//删除代码修复法师冰环漏怪    // early check to prevent FrostNova damage to remove Aura 26//添加代码修复法师冰环漏怪
+//删除代码修复法师冰环漏怪    if (procSpell && (procSpell->Id == spellProto->Id) && (spellProto->SpellIconID == 193) &&//添加代码修复法师冰环漏怪
+//删除代码修复法师冰环漏怪        (spellProto->SpellVisual == 17) && (spellProto->SpellFamilyName == SPELLFAMILY_MAGE))//添加代码修复法师冰环漏怪
+//删除代码修复法师冰环漏怪        return false;//添加代码修复法师冰环漏怪
+
     // Get proc Event Entry
     spellProcEvent = sSpellMgr.GetSpellProcEvent(spellProto->Id);
 
@@ -716,6 +721,20 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
 
                 int damagePoint;
 
+                // Talent - Improve Seal of Righteousness //添加代码修复骑士审判等技能加成
+                uint32 ModSpellId[] = { 20224, 20225, 20330, 20331, 20332 }; //添加代码修复骑士审判等技能加成
+                float ModPct = 1.0f; //添加代码修复骑士审判等技能加成
+                AuraList const& mModDamagePercentModifier = GetAurasByType(SPELL_AURA_ADD_PCT_MODIFIER); //添加代码修复骑士审判等技能加成
+                for (AuraList::const_iterator i = mModDamagePercentModifier.begin(); i != mModDamagePercentModifier.end(); ++i) //添加代码修复骑士审判等技能加成
+                { //添加代码修复骑士审判等技能加成
+                    for (int j = 0; j < 5; j++) //添加代码修复骑士审判等技能加成
+                    { //添加代码修复骑士审判等技能加成
+                        if ((*i)->GetId() == ModSpellId[j]) //添加代码修复骑士审判等技能加成
+                            ModPct *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f; //添加代码修复骑士审判等技能加成
+                    } //添加代码修复骑士审判等技能加成
+                } //添加代码修复骑士审判等技能加成
+                triggerAmount = triggerAmount * ModPct; //添加代码修复骑士审判等技能加成
+
                 // In the description, we can find the divider of the base points for min/max effects.
                 int min=triggerAmount/87;
                 int max=triggerAmount/25;
@@ -1160,8 +1179,8 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
         return SPELL_AURA_PROC_FAILED;
     }
 
-    // not allow proc extra attack spell at extra attack
-    if (m_extraAttacks && IsSpellHaveEffect(triggerEntry, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
+    // not allow proc extra attack spell at extra attack, except the paladin Reckoning with hacky limitation in the spelleffect //添加代码修复骑士清算
+    if (m_extraAttacks && triggerEntry->HasSpellEffect(SPELL_EFFECT_ADD_EXTRA_ATTACKS) && triggerEntry->Id != 20178) //添加代码修复骑士清算
         { return SPELL_AURA_PROC_FAILED; }
 
     // Custom basepoints/target for exist spell

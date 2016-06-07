@@ -1143,6 +1143,7 @@ void CreatureEventAI::EnterEvadeMode()
         if (i->Event.event_type == EVENT_T_EVADE)
             { ProcessEvent(*i); }
     }
+    m_creature->ResetPlayerDamageReq();//Ìí¼Ó´úÂëĞŞ¸´50%ÉËº¦µôÂä
 }
 
 void CreatureEventAI::JustDied(Unit* killer)

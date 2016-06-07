@@ -254,10 +254,13 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     uint32 savedpower = fields[14].GetUInt32();
 
     // set current pet as current
-    // 0=current
-    // 1..MAX_PET_STABLES in stable slot
-    // PET_SAVE_NOT_IN_SLOT(100) = not stable slot (summoning))
-    if (fields[10].GetUInt32() != 0)
+//删除错误的代码修复猎人召唤死亡的宠物    // 0=current
+//删除错误的代码修复猎人召唤死亡的宠物    // 1..MAX_PET_STABLES in stable slot
+//删除错误的代码修复猎人召唤死亡的宠物    // PET_SAVE_NOT_IN_SLOT(100) = not stable slot (summoning))
+    // 0 = current//添加代码修复猎人召唤死亡的宠物
+    // 1..MAX_PET_STABLES = in stable slot//添加代码修复猎人召唤死亡的宠物
+    // PET_SAVE_NOT_IN_SLOT(100) = not stable slot (summoning) or hunter pet dead//添加代码修复猎人召唤死亡的宠物
+	    if (fields[10].GetUInt32() != 0)
     {
         CharacterDatabase.BeginTransaction();
 
@@ -327,6 +330,10 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     {
         SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
         SetPower(powerType, savedpower > GetMaxPower(powerType) ? GetMaxPower(powerType) : savedpower);
+
+        if (getPetType() == HUNTER_PET && savedhealth == 0)//添加代码修复猎人召唤死亡的宠物
+          SetDeathState(JUST_DIED);//添加代码修复猎人召唤死亡的宠物
+
     }
 
     AIM_Initialize();
@@ -390,6 +397,13 @@ void Pet::SavePetToDB(PetSaveMode mode)
         }
 
         uint32 curhealth = GetHealth();
+
+        if (getPetType() != HUNTER_PET)//添加代码修复猎人召唤死亡的宠物
+        {//添加代码修复猎人召唤死亡的宠物
+            if (curhealth < 1)//添加代码修复猎人召唤死亡的宠物
+              curhealth = 1;//添加代码修复猎人召唤死亡的宠物
+        }//添加代码修复猎人召唤死亡的宠物
+
         uint32 curpower = GetPower(GetPowerType());
 
         // stable and not in slot saves
@@ -450,7 +464,8 @@ void Pet::SavePetToDB(PetSaveMode mode)
         savePet.addUInt32(uint32(mode));
         savePet.addString(m_name);
         savePet.addUInt32(uint32(HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME) ? 0 : 1));
-        savePet.addUInt32((curhealth < 1 ? 1 : curhealth));
+//删除错误的代码修复猎人召唤死亡的宠物        savePet.addUInt32((curhealth < 1 ? 1 : curhealth));
+        savePet.addUInt32((curhealth));//添加代码修复猎人召唤死亡的宠物
         savePet.addUInt32(curpower);
         savePet.addUInt32(GetPower(POWER_HAPPINESS));
 
@@ -551,7 +566,14 @@ void Pet::Update(uint32 update_diff, uint32 diff)
     {
         case CORPSE:
         {
-            Unsummon(PET_SAVE_NOT_IN_SLOT);
+//删除错误的代码修复猎人召唤死亡的宠物            Unsummon(PET_SAVE_NOT_IN_SLOT);
+
+            if (getPetType() != HUNTER_PET || m_corpseRemoveTime <= time(NULL))//添加代码修复猎人召唤死亡的宠物
+            {//添加代码修复猎人召唤死亡的宠物
+                Unsummon(PET_SAVE_NOT_IN_SLOT);//添加代码修复猎人召唤死亡的宠物
+                return;//添加代码修复猎人召唤死亡的宠物
+            }//添加代码修复猎人召唤死亡的宠物
+
             break;
         }
         case ALIVE:
@@ -986,7 +1008,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
 
     uint32 guid = creature->GetMap()->GenerateLocalLowGuid(HIGHGUID_PET);
 
-    BASIC_LOG("Create pet");
+//删除错误的代码修复猎人召唤死亡的宠物    BASIC_LOG("Create pet");
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
     if (!Create(guid, pos, creature->GetCreatureInfo(), pet_number))
         { return false; }
@@ -1080,9 +1102,12 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
 
     SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(petlevel * 50));
 
-    SetAttackTime(BASE_ATTACK, BASE_ATTACK_TIME);
-    SetAttackTime(OFF_ATTACK, BASE_ATTACK_TIME);
-    SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
+//去掉这些错误的代码    SetAttackTime(BASE_ATTACK, BASE_ATTACK_TIME);
+//去掉这些错误的代码    SetAttackTime(OFF_ATTACK, BASE_ATTACK_TIME);
+//去掉这些错误的代码    SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
+    SetAttackTime(BASE_ATTACK, cinfo->MeleeBaseAttackTime);//添加代码修复猎人宝宝攻速
+    SetAttackTime(OFF_ATTACK, cinfo->MeleeBaseAttackTime);//添加代码修复猎人宝宝攻速
+    SetAttackTime(RANGED_ATTACK, cinfo->RangedBaseAttackTime);//添加代码修复猎人宝宝攻速
 
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0);
 
@@ -1187,9 +1212,12 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
             SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, sObjectMgr.GetXPForPetLevel(petlevel));
             // these formula may not be correct; however, it is designed to be close to what it should be
             // this makes dps 0.5 of pets level
-            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(0.5 * GetAttackTime(BASE_ATTACK) * (petlevel - (petlevel / 4)) / 1000));
-            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(0.5 * GetAttackTime(BASE_ATTACK) * (petlevel + (petlevel / 4)) / 1000));
+//去掉这些错误的代码            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(0.5 * GetAttackTime(BASE_ATTACK) * (petlevel - (petlevel / 4)) / 1000));
+//去掉这些错误的代码            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(0.5 * GetAttackTime(BASE_ATTACK) * (petlevel + (petlevel / 4)) / 1000));
             // damage is increased afterwards as strength and pet scaling modify attack power
+            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));//添加代码修复猎人宝宝攻速
+            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));//添加代码修复猎人宝宝攻速
+            // damage is modified afterwards based on creature attack power and attack speed//添加代码修复猎人宝宝攻速
 
             // stored standard pet stats are entry 1 in pet_levelinfo
             PetLevelInfo const* pInfo = sObjectMgr.GetPetLevelInfo(creature_ID, petlevel);
@@ -2056,3 +2084,47 @@ void Pet::ApplyModeFlags(PetModeFlags mode, bool apply)
     data << uint32(m_petModeFlags);
     ((Player*)owner)->GetSession()->SendPacket(&data);
 }
+
+PetDatabaseStatus Pet::GetStatusFromDB(Player* owner)//添加代码修复猎人召唤死亡的宠物
+{//添加代码修复猎人召唤死亡的宠物
+    PetDatabaseStatus status = PET_DB_NO_PET;//添加代码修复猎人召唤死亡的宠物
+
+    uint32 ownerid = owner->GetGUIDLow();//添加代码修复猎人召唤死亡的宠物
+
+    QueryResult* result;//添加代码修复猎人召唤死亡的宠物
+                                      //      0   1      2      3        4      5    6           7              8        9           10    11    12       13         14       15            16      17              18        19                 20                 21              22
+    result = CharacterDatabase.PQuery("SELECT id, entry, owner, modelid, level, exp, Reactstate, loyaltypoints, loyalty, trainpoint, slot, name, renamed, curhealth, curmana, curhappiness, abdata, TeachSpelldata, savetime, resettalents_cost, resettalents_time, CreatedBySpell, PetType "
+//删除错误的代码修复猎人召唤死亡的宠物                                      "FROM character_pet WHERE owner = '%u' AND (slot = '%u') ",
+//删除错误的代码修复猎人召唤死亡的宠物                                      ownerid, PET_SAVE_AS_CURRENT);
+                                      "FROM character_pet WHERE owner = %u AND (slot = %u OR slot > %u)",//添加代码修复猎人召唤死亡的宠物
+                                      ownerid, PET_SAVE_AS_CURRENT, PET_SAVE_LAST_STABLE_SLOT);//添加代码修复猎人召唤死亡的宠物
+
+    if (!result)//添加代码修复猎人召唤死亡的宠物
+        { return status; }//添加代码修复猎人召唤死亡的宠物
+
+    Field* fields = result->Fetch();//添加代码修复猎人召唤死亡的宠物
+
+    uint32 petentry = fields[1].GetUInt32();//添加代码修复猎人召唤死亡的宠物
+
+    if (!petentry)//添加代码修复猎人召唤死亡的宠物
+    {//添加代码修复猎人召唤死亡的宠物
+        delete result;//添加代码修复猎人召唤死亡的宠物
+        return status;//添加代码修复猎人召唤死亡的宠物
+    }//添加代码修复猎人召唤死亡的宠物
+
+    CreatureInfo const* creatureInfo = ObjectMgr::GetCreatureTemplate(petentry);//添加代码修复猎人召唤死亡的宠物
+    if (!creatureInfo)//添加代码修复猎人召唤死亡的宠物
+    {//添加代码修复猎人召唤死亡的宠物
+        delete result;//添加代码修复猎人召唤死亡的宠物
+        return status;//添加代码修复猎人召唤死亡的宠物
+    }//添加代码修复猎人召唤死亡的宠物
+
+    uint32 savedHP = fields[13].GetUInt32();//添加代码修复猎人召唤死亡的宠物
+    delete result;//添加代码修复猎人召唤死亡的宠物
+    if (savedHP > 0)//添加代码修复猎人召唤死亡的宠物
+        status = PET_DB_ALIVE;//添加代码修复猎人召唤死亡的宠物
+    else
+        status = PET_DB_DEAD;//添加代码修复猎人召唤死亡的宠物
+
+    return status;//添加代码修复猎人召唤死亡的宠物
+}//添加代码修复猎人召唤死亡的宠物

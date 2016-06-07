@@ -262,6 +262,12 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
             moveFlags |= MOVEFLAG_ONTRANSPORT;
         }
 
+        float x;    // not used anywhere//添加代码修复npc返回原始坐标
+        if (m_objectTypeId == TYPEID_UNIT && ((Unit*)this)->movespline && ((Unit*)this)->GetMotionMaster()->GetDestination(x, x, x))//添加代码修复npc返回原始坐标
+        {//添加代码修复npc返回原始坐标
+            moveFlags |= MOVEFLAG_WALK_MODE | MOVEFLAG_FORWARD | MOVEFLAG_SPLINE_ENABLED;//添加代码修复npc返回原始坐标
+        }//添加代码修复npc返回原始坐标
+
         *data << uint32(moveFlags);                         // movement flags
         *data << uint32(WorldTimer::getMSTime());           // time (in milliseconds)
     }
@@ -321,7 +327,8 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
 
         if (m_objectTypeId == TYPEID_UNIT)
         {
-            if (moveFlags & MOVEFLAG_SPLINE_ENABLED)        // 0x00400000
+//删除代码修复npc返回原始坐标            if (moveFlags & MOVEFLAG_SPLINE_ENABLED)        // 0x00400000
+            if (moveFlags & MOVEFLAG_SPLINE_ENABLED && ((Unit*)this)->movespline)        // 0x00400000//添加代码修复npc返回原始坐标
             {
                 Movement::PacketBuilder::WriteCreate((*((Unit*)this)->movespline), *data);
             }

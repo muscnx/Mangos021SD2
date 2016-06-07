@@ -28,4 +28,6 @@
 #define REVISION_DB_CHARACTERS "required_20005_01_characters_pvpstats"
 #define REVISION_DB_MANGOS "required_21000_02_Waypoint_update"
 #define REVISION_DB_REALMD "required_20140607_Realm_Resync"
+#define WORLD_DB_CONTENT_NR 7 //增加代码修复猎人宝宝攻速
+#define WORLD_DB_UPDATE_DESCRIPTION "Fix BG buffs" //增加代码修复猎人宝宝攻速
 #endif // __REVISION_H__

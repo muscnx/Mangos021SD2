@@ -393,13 +393,14 @@ namespace VMAP
                     size_t fileRead = fread(&referencedVal, sizeof(uint32), 1, tf);
                     if (!iLoadedSpawns.count(referencedVal) || fileRead <= 0)
                     {
-#ifdef VMAP_DEBUG
+//删除代码修复vmap地图导致宕机#ifdef VMAP_DEBUG
                         if (referencedVal > iNTreeValues)
                         {
-                            DEBUG_LOG("invalid tree element! (%u/%u)", referencedVal, iNTreeValues);
+//删除代码修复vmap地图导致宕机                            DEBUG_LOG("invalid tree element! (%u/%u)", referencedVal, iNTreeValues);
+                            ERROR_LOG("invalid tree element! (%u/%u)", referencedVal, iNTreeValues);//添加代码修复vmap地图导致宕机
                             continue;
                         }
-#endif
+//删除代码修复vmap地图导致宕机#endif
                         iTreeValues[referencedVal] = ModelInstance(spawn, model);
                         iLoadedSpawns[referencedVal] = 1;
                     }

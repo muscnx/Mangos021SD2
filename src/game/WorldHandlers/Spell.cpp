@@ -948,6 +948,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         {
             DoSpellHitOnUnit(m_caster, mask, true);
             unitTarget = m_caster;
+            if (m_caster->GetTypeId() == TYPEID_UNIT)//添加代码修复50%伤害掉落
+                m_caster->ToCreature()->LowerPlayerDamageReq(target->damage);//添加代码修复50%伤害掉落
         }
     }
     else                                                    // in 1.12.1 we need explicit miss info
@@ -1056,7 +1058,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         caster->DealSpellDamage(&damageInfo, true);
 
         // Bloodthirst
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000002000000))
+//删除错误的代码        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000002000000))
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && //添加代码修复嗜血和致死打击
+            m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000002000000) && //添加代码修复嗜血和致死打击
+            m_spellInfo->SpellIconID == 38) //添加代码修复嗜血和致死打击
         {
             uint32 BTAura = 0;
             switch (m_spellInfo->Id)
@@ -1167,10 +1172,16 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
 
                 switch (m_spellInfo->Id)
                 {
+                         // Mind Soothe (all ranks) //添加代码修复安抚心灵
+                    case 453: //添加代码修复安抚心灵
+                    case 8192: //添加代码修复安抚心灵
+                    case 10953: //添加代码修复安抚心灵
                         //Soothe animal
                     case 9901:
                     case 8955:
                     case 2908:
+                        // Gnomish Mind Control Cap //添加代码修复侏儒洗脑帽
+                    case 13180: //添加代码修复侏儒洗脑帽
                         break;
                     default:
                     {
@@ -2558,6 +2569,10 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
     // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
     if (!m_IsTriggeredSpell && isSpellBreakStealth(m_spellInfo))
     {
+     // Sap - don't exit Stealth yet to prevent getting in combat and making Sap impossible to cast//添加代码修复战斗中退出隐身
+     // Removing Stealth depends on talent later//添加代码修复战斗中退出隐身
+     // Pick Pocket - don't exit Stealth at all//添加代码修复战斗中退出隐身
+     if (!(m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && (m_spellInfo->SpellFamilyFlags & UI64LIT(0x00000080) || m_spellInfo->SpellFamilyFlags & 2147483648)))//添加代码修复战斗中退出隐身
         m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         m_caster->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
     }
@@ -2702,6 +2717,12 @@ void Spell::cast(bool skipCheck)
                 { AddPrecastSpell(25771); }                     // Forbearance
             break;
         }
+		case SPELLFAMILY_ROGUE://添加代码修复战斗中退出隐身
+	            {//添加代码修复战斗中退出隐身
+	            // exit stealth on sap when improved sap is not skilled //添加代码修复战斗中退出隐身
+	            if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x00000080) && m_caster->GetTypeId() == TYPEID_PLAYER && (!m_caster->GetAura(14076, SpellEffectIndex(0)) && !m_caster->GetAura(14094, SpellEffectIndex(0)) && !m_caster->GetAura(14095, SpellEffectIndex(0))))//添加代码修复战斗中退出隐身
+	            m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);//添加代码修复战斗中退出隐身
+	            }//添加代码修复战斗中退出隐身
         case SPELLFAMILY_WARRIOR:
             break;
         case SPELLFAMILY_PRIEST:
@@ -2939,6 +2960,25 @@ void Spell::_handle_finish_phase()
     // spell log
     if (m_needSpellLog)
         { SendLogExecute(); }
+
+    if (m_caster->m_extraAttacks && m_spellInfo->HasSpellEffect(SPELL_EFFECT_ADD_EXTRA_ATTACKS)) //添加代码修复风怒武器
+    { //添加代码修复风怒武器
+        switch (m_spellInfo->Id) //添加代码修复风怒武器
+        { //添加代码修复风怒武器
+        // on next swing //添加代码修复风怒武器
+        case 15494: //添加代码修复风怒武器
+        case 18797: //添加代码修复风怒武器
+        case 21919: //添加代码修复风怒武器
+        case 20178: // paladin reckoning proc //添加代码修复风怒武器
+            break; //添加代码修复风怒武器
+        default: //添加代码修复风怒武器
+            if (Unit* victim = m_caster->getVictim()) //添加代码修复风怒武器
+                m_caster->HandleProcExtraAttackFor(victim); //添加代码修复风怒武器
+            else //添加代码修复风怒武器
+                m_caster->m_extraAttacks = 0;   // do not allow to accumulate instant extra attacks //添加代码修复风怒武器
+            break; //添加代码修复风怒武器
+        } //添加代码修复风怒武器
+    } //添加代码修复风怒武器
 }
 
 void Spell::SendSpellCooldown()
@@ -2960,11 +3000,25 @@ void Spell::update(uint32 difftime)
     // update pointers based at it's GUIDs
     UpdatePointers();
 
-    if (m_targets.getUnitTargetGuid() && !m_targets.getUnitTarget())
+//删除错误的代码修复盗贼消失和猎人假死    if (m_targets.getUnitTargetGuid() && !m_targets.getUnitTarget())
+    if (!m_targets.getUnitTargetGuid().IsEmpty() && !m_targets.getUnitTarget())//添加代码修复盗贼消失和猎人假死
     {
         cancel();
         return;
     }
+
+    // check for target going invisiblity/fake death//添加代码修复盗贼消失和猎人假死
+    if (Unit* target = m_targets.getUnitTarget())//添加代码修复盗贼消失和猎人假死
+    {//添加代码修复盗贼消失和猎人假死
+        if (!target->IsVisibleForOrDetect(m_caster, m_caster, true) || target->HasAuraType(SPELL_AURA_FEIGN_DEATH))//添加代码修复盗贼消失和猎人假死
+        {//添加代码修复盗贼消失和猎人假死
+            if (m_caster->GetTargetGuid() == target->GetObjectGuid())//添加代码修复盗贼消失和猎人假死
+                m_caster->SetTargetGuid(ObjectGuid());//添加代码修复盗贼消失和猎人假死
+            cancel();//添加代码修复盗贼消失和猎人假死
+            return;//添加代码修复盗贼消失和猎人假死
+        }//添加代码修复盗贼消失和猎人假死
+    }//添加代码修复盗贼消失和猎人假死
+
 
     // check if the player or unit caster has moved before the spell finished (exclude casting on vehicles)
     if (((m_caster->GetTypeId() == TYPEID_PLAYER || m_caster->GetTypeId() == TYPEID_UNIT) && m_timer != 0) &&
@@ -3006,7 +3060,12 @@ void Spell::update(uint32 difftime)
 
                     // check for incapacitating player states
                     if (m_caster->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
-                        { cancel(); }
+//删除代码修复不要中断某些法术                        { cancel(); }
+                    {//添加代码修复不要中断某些代码
+                        // certain channel spells are not interrupted//添加代码修复不要中断某些代码
+                        if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNELED_1) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_UNK28))//添加代码修复不要中断某些代码
+                            cancel();//添加代码修复不要中断某些代码
+                    }//添加代码修复不要中断某些代码
 
                     // check if player has turned if flag is set
                     if (m_spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_TURNING && m_castOrientation != m_caster->GetOrientation())
@@ -3704,7 +3763,34 @@ void Spell::TakePower()
 
     Powers powerType = Powers(m_spellInfo->powerType);
 
-    m_caster->ModifyPower(powerType, -(int32)m_powerCost);
+//删除错误的代码修复掉怒气和能量的问题    m_caster->ModifyPower(powerType, -(int32)m_powerCost);
+    bool hit = true;//添加代码修复掉怒气和能量的问题
+    for (uint8 j = 0; j < 3; ++j)//添加代码修复掉怒气和能量的问题
+    {//添加代码修复掉怒气和能量的问题
+        // Spell targets a single enemy//添加代码修复掉怒气和能量的问题
+        if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_CHAIN_DAMAGE ||//添加代码修复掉怒气和能量的问题
+            m_spellInfo->EffectImplicitTargetA[j] == TARGET_CURRENT_ENEMY_COORDINATES)//添加代码修复掉怒气和能量的问题
+        {//添加代码修复掉怒气和能量的问题
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)//添加代码修复掉怒气和能量的问题
+            {//添加代码修复掉怒气和能量的问题
+                if (powerType == POWER_ENERGY)//添加代码修复掉怒气和能量的问题
+                    if (uint64 targetGUID = m_targets.getUnitTargetGuid())//添加代码修复掉怒气和能量的问题
+                        for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)//添加代码修复掉怒气和能量的问题
+                            if (ihit->targetGUID = targetGUID)//添加代码修复掉怒气和能量的问题
+                            {//添加代码修复掉怒气和能量的问题
+                                if (ihit->missCondition != SPELL_MISS_NONE)//添加代码修复掉怒气和能量的问题
+                                {//添加代码修复掉怒气和能量的问题
+                                    hit = false;//添加代码修复掉怒气和能量的问题
+                                }//添加代码修复掉怒气和能量的问题
+                                break;//添加代码修复掉怒气和能量的问题
+                            }//添加代码修复掉怒气和能量的问题
+            }//添加代码修复掉怒气和能量的问题
+        }//添加代码修复掉怒气和能量的问题
+    }//添加代码修复掉怒气和能量的问题
+    if (hit || m_spellInfo->AttributesEx & SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS || m_spellInfo->AttributesEx & SPELL_ATTR_EX_REQ_COMBO_POINTS)//添加代码修复掉怒气和能量的问题
+        m_caster->ModifyPower(powerType, -(int32)m_powerCost);//添加代码修复掉怒气和能量的问题
+    else//添加代码修复掉怒气和能量的问题
+        m_caster->ModifyPower(powerType, -(int32)m_powerCost / 5);//添加代码修复掉怒气和能量的问题
 
     // Set the five second timer
     if (powerType == POWER_MANA && m_powerCost > 0)
@@ -3909,6 +3995,19 @@ void Spell::CastTriggerSpells()
 {
     for (SpellInfoList::const_iterator si = m_TriggerSpells.begin(); si != m_TriggerSpells.end(); ++si)
     {
+        bool _triggered = true; //添加代码修复侏儒洗脑帽
+
+        // ignore triggered status for certain spells //添加代码修复侏儒洗脑帽
+        switch ((*si)->Id) //添加代码修复侏儒洗脑帽
+        { //添加代码修复侏儒洗脑帽
+            case 13181:                                      // Gnomish MC cap //添加代码修复侏儒洗脑帽
+            case 20578:                                      // Cannibalize healing effect //添加代码修复侏儒洗脑帽
+                _triggered = false; //添加代码修复侏儒洗脑帽
+                break; //添加代码修复侏儒洗脑帽
+            default: //添加代码修复侏儒洗脑帽
+                break; //添加代码修复侏儒洗脑帽
+        } //添加代码修复侏儒洗脑帽
+
         Spell* spell = new Spell(m_caster, (*si), true, m_originalCasterGUID);
         spell->prepare(&m_targets);                         // use original spell original targets
     }
@@ -4885,11 +4984,28 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELL_EFFECT_SUMMON_DEAD_PET:
             {
                 Creature* pet = m_caster->GetPet();
-                if (!pet)
-                    { return SPELL_FAILED_NO_PET; }
+//删除错误的代码修复猎人召唤死亡的宠物                if (!pet)
+//删除错误的代码修复猎人召唤死亡的宠物                    { return SPELL_FAILED_NO_PET; }
 
-                if (pet->IsAlive())
-                    { return SPELL_FAILED_ALREADY_HAVE_SUMMON; }
+//删除错误的代码修复猎人召唤死亡的宠物                if (pet->IsAlive())
+                if (pet && pet->IsAlive())//添加代码修复猎人召唤死亡的宠物
+	                    { return SPELL_FAILED_ALREADY_HAVE_SUMMON; }
+
+                if (!pet)//添加代码修复猎人召唤死亡的宠物
+                {//添加代码修复猎人召唤死亡的宠物
+                    if (Player* player = m_caster->ToPlayer())//添加代码修复猎人召唤死亡的宠物
+                    {//添加代码修复猎人召唤死亡的宠物
+                      PetDatabaseStatus status = Pet::GetStatusFromDB(player);//添加代码修复猎人召唤死亡的宠物
+                      if (status == PET_DB_NO_PET)//添加代码修复猎人召唤死亡的宠物
+                          return SPELL_FAILED_NO_PET;//添加代码修复猎人召唤死亡的宠物
+                      else if (status == PET_DB_ALIVE)//添加代码修复猎人召唤死亡的宠物
+                          return SPELL_FAILED_TARGET_NOT_DEAD;//添加代码修复猎人召唤死亡的宠物
+                    }//添加代码修复猎人召唤死亡的宠物
+                    else//添加代码修复猎人召唤死亡的宠物
+                    {//添加代码修复猎人召唤死亡的宠物
+                        return SPELL_FAILED_NO_PET;//添加代码修复猎人召唤死亡的宠物
+                    }//添加代码修复猎人召唤死亡的宠物
+                }//添加代码修复猎人召唤死亡的宠物
 
                 break;
             }
@@ -4910,21 +5026,33 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             case SPELL_EFFECT_SUMMON_PET:
             {
+                Player* plr = m_caster->ToPlayer();//添加代码修复猎人召唤死亡的宠物
                 if (m_caster->GetPetGuid())                 // let warlock do a replacement summon
                 {
-                    Pet* pet = ((Player*)m_caster)->GetPet();
+//删除错误的代码修复猎人召唤死亡的宠物                    Pet* pet = ((Player*)m_caster)->GetPet();
+                    Pet* pet = m_caster->GetPet();//添加代码修复猎人召唤死亡的宠物
 
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_WARLOCK)
-                    {
-                        if (strict)                         // Summoning Disorientation, trigger pet stun (cast by pet so it doesn't attack player)
-                            { pet->CastSpell(pet, 32752, true, NULL, NULL, pet->GetObjectGuid()); }
-                    }
-                    else
-                        { return SPELL_FAILED_ALREADY_HAVE_SUMMON; }
+//删除错误的代码修复猎人召唤死亡的宠物                    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_WARLOCK)
+//删除错误的代码修复猎人召唤死亡的宠物                    {
+//删除错误的代码修复猎人召唤死亡的宠物                        if (strict)                         // Summoning Disorientation, trigger pet stun (cast by pet so it doesn't attack player)
+//删除错误的代码修复猎人召唤死亡的宠物                            { pet->CastSpell(pet, 32752, true, NULL, NULL, pet->GetObjectGuid()); }
+//删除错误的代码修复猎人召唤死亡的宠物                    }
+//删除错误的代码修复猎人召唤死亡的宠物                    else
+                    if (plr && m_caster->getClass() != CLASS_WARLOCK)//添加代码修复猎人召唤死亡的宠物
+	                        { return SPELL_FAILED_ALREADY_HAVE_SUMMON; }
                 }
 
                 if (m_caster->GetCharmGuid())
                     { return SPELL_FAILED_ALREADY_HAVE_CHARM; }
+
+                if (plr)//添加代码修复猎人召唤死亡的宠物
+                {//添加代码修复猎人召唤死亡的宠物
+                    PetDatabaseStatus status = Pet::GetStatusFromDB(plr);//添加代码修复猎人召唤死亡的宠物
+                    if (status == PET_DB_DEAD)//添加代码修复猎人召唤死亡的宠物
+                      return SPELL_FAILED_TARGETS_DEAD;//添加代码修复猎人召唤死亡的宠物
+                    else if ((plr->getClass() == CLASS_HUNTER) && (status == PET_DB_NO_PET))//添加代码修复猎人召唤死亡的宠物
+                      return SPELL_FAILED_NO_PET;//添加代码修复猎人召唤死亡的宠物
+                }//添加代码修复猎人召唤死亡的宠物
 
                 break;
             }

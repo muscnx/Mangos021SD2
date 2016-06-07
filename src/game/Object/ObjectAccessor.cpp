@@ -105,10 +105,19 @@ Player* ObjectAccessor::FindPlayerByName(const char* name)
 void
 ObjectAccessor::SaveAllPlayers()
 {
-    HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
-    HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
-    for (HashMapHolder<Player>::MapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-        { itr->second->SaveToDB(); }
+//删除代码修复导致崩溃的gm命令    HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
+//删除代码修复导致崩溃的gm命令    HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
+//删除代码修复导致崩溃的gm命令    for (HashMapHolder<Player>::MapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+//删除代码修复导致崩溃的gm命令        { itr->second->SaveToDB(); }
+   SessionMap const& smap = sWorld.GetAllSessions();//添加代码修复导致崩溃的gm命令
+   SessionMap::const_iterator iter;//添加代码修复导致崩溃的gm命令
+   for (iter = smap.begin(); iter != smap.end(); ++iter){//添加代码修复导致崩溃的gm命令
+       if (Player* player = iter->second->GetPlayer()){//添加代码修复导致崩溃的gm命令
+           if (player->IsInWorld()){//添加代码修复导致崩溃的gm命令
+               player->SaveToDB();//添加代码修复导致崩溃的gm命令
+           }//添加代码修复导致崩溃的gm命令
+       }//添加代码修复导致崩溃的gm命令
+   }//添加代码修复导致崩溃的gm命令
 }
 
 void ObjectAccessor::KickPlayer(ObjectGuid guid)

@@ -845,7 +845,9 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     switch (spellproto->EffectMiscValue[effIndex])
                     {
                         case SPELLMOD_COST:                 // dependent from bas point sign (negative -> positive)
-                            if (spellproto->CalculateSimpleValue(effIndex) > 0)
+                        if(spellproto->Id == 12042)         // Arcane Power//添加代码修复debuff图标所处位置不对
+                                break;//添加代码修复debuff图标所处位置不对
+	                            if (spellproto->CalculateSimpleValue(effIndex) > 0)
                                 { return false; }
                             break;
                         default:
@@ -1902,6 +1904,7 @@ void SpellMgr::ModDBCSpellAttributes()
     uint32 spell_id;
 
     list_spell_id.push_back(20647);
+    list_spell_id.push_back(16870);//添加代码修复德鲁伊掉光环
 
     for (std::list<uint32>::iterator it = list_spell_id.begin(); it != list_spell_id.end(); ++it)
     {
@@ -1918,6 +1921,9 @@ void SpellMgr::ModDBCSpellAttributes()
                 spellInfo->Attributes |= SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK;
                 spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_CANT_MISS;                
                 break;
+            case 16870://添加代码修复德鲁伊掉光环
+                spellInfo->procFlags = PROC_FLAG_NONE;//添加代码修复德鲁伊掉光环
+                break;//添加代码修复德鲁伊掉光环
         }
     }
 }

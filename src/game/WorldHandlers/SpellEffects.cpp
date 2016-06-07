@@ -521,6 +521,22 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_originalCaster->CastSpell(channelTarget, 13481, true, NULL, NULL, m_originalCasterGUID, m_spellInfo);
                     return;
                 }
+                case 13180:                                 // Gnomish mind control cap //添加代码修复洗脑帽
+                { //添加代码修复洗脑帽
+                    if (!unitTarget) //添加代码修复洗脑帽
+                        { return; } //添加代码修复洗脑帽
+
+                    uint32 roll = urand(0,99); //添加代码修复洗脑帽
+
+                    if (roll < 5)                          // 5% victim MC the caster (off-like chance unknown) //添加代码修复洗脑帽
+                        { unitTarget->CastSpell(m_caster, 13181, true, NULL); } //添加代码修复洗脑帽
+                    else if (roll < 35)                    // 30% fail (off-like chance unknown) //添加代码修复洗脑帽
+                        { return; } //添加代码修复洗脑帽
+                    else                                   // 65% caster MC the victim (off-like chance unknown) //添加代码修复洗脑帽
+                        { AddTriggeredSpell(13181); } //添加代码修复洗脑帽
+
+                    return; //添加代码修复洗脑帽
+                } //添加代码修复洗脑帽
                 case 13567:                                 // Dummy Trigger
                 {
                     // can be used for different aura triggering, so select by aura
@@ -1878,7 +1894,8 @@ void Spell::EffectEnergize(SpellEffectIndex eff_idx)
     switch (m_spellInfo->Id)
     {
         case 9512:                                          // Restore Energy
-            level_diff = m_caster->getLevel() - 40;
+//删除错误的代码修复菊花茶恢复能量值            level_diff = m_caster->getLevel() - 40;
+            level_diff = m_caster->getLevel() - 60;//添加错误的代码修复菊花茶恢复能量值
             level_multiplier = 2;
             break;
         case 24571:                                         // Blood Fury
@@ -3111,16 +3128,16 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
 
     switch (m_spellInfo->SpellFamilyName)
     {
-        case SPELLFAMILY_GENERIC:
-        {
-            // Seal of Command - receive benefit from Spell Damage and Healing
-            if (m_spellInfo->Id == 20424)
-            {
-                spell_bonus = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, spell_bonus, SPELL_DIRECT_DAMAGE);
-                spell_bonus = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, spell_bonus, SPELL_DIRECT_DAMAGE);
-            }
-            break;
-        }
+//删除错误的代码修复骑士审判等技能        case SPELLFAMILY_GENERIC:
+//删除错误的代码修复骑士审判等技能        {
+//删除错误的代码修复骑士审判等技能            // Seal of Command - receive benefit from Spell Damage and Healing
+//删除错误的代码修复骑士审判等技能            if (m_spellInfo->Id == 20424)
+//删除错误的代码修复骑士审判等技能            {
+//删除错误的代码修复骑士审判等技能                spell_bonus = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, spell_bonus, SPELL_DIRECT_DAMAGE);
+//删除错误的代码修复骑士审判等技能                spell_bonus = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, spell_bonus, SPELL_DIRECT_DAMAGE);
+//删除错误的代码修复骑士审判等技能            }
+//删除错误的代码修复骑士审判等技能            break;
+//删除错误的代码修复骑士审判等技能        }
         case SPELLFAMILY_ROGUE:
         {
             // Ambush
@@ -3148,6 +3165,23 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
                 break;
             case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
                 weaponDamagePercentMod *= float(CalculateDamage(SpellEffectIndex(j), unitTarget)) / 100.0f;
+
+                //Prevent Seal of Command damage overflow //添加代码修复骑士审判等技能加成
+                if (m_spellInfo->Id == 20424) //添加代码修复骑士审判等技能加成
+                { //添加代码修复骑士审判等技能加成
+                    Unit::AuraList const& mModDamagePercentDone = m_caster->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE); //添加代码修复骑士审判等技能加成
+                    for (Unit::AuraList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i) //添加代码修复骑士审判等技能加成
+                    { //添加代码修复骑士审判等技能加成
+                        if (((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_HOLY) && ((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL) && //添加代码修复骑士审判等技能加成
+                            (*i)->GetSpellProto()->EquippedItemClass == -1 && //添加代码修复骑士审判等技能加成
+                            // -1 == any item class (not wand then) //添加代码修复骑士审判等技能加成
+                            (*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0) //添加代码修复骑士审判等技能加成
+                            // 0 == any inventory type (not wand then) //添加代码修复骑士审判等技能加成
+                        { //添加代码修复骑士审判等技能加成
+                            totalDamagePercentMod /= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f; //添加代码修复骑士审判等技能加成
+                        } //添加代码修复骑士审判等技能加成
+                    } //添加代码修复骑士审判等技能加成
+                } //添加代码修复骑士审判等技能加成
 
                 // applied only to prev.effects fixed damage
                 if (customBonusDamagePercentMod)
@@ -4370,9 +4404,15 @@ void Spell::EffectAddExtraAttacks(SpellEffectIndex /*eff_idx*/)
         { return; }
 
     if (unitTarget->m_extraAttacks)
-        { return; }
+//删除错误的代码        { return; }
 
-    unitTarget->m_extraAttacks = damage;
+//删除错误的代码    unitTarget->m_extraAttacks = damage;
+    { //添加代码修复骑士清算
+        if (m_spellInfo->Id == 20178 && unitTarget->m_extraAttacks < 4) //添加代码修复骑士清算
+            ++unitTarget->m_extraAttacks;   // += damage would be more logical //添加代码修复骑士清算
+    } //添加代码修复骑士清算
+    else //添加代码修复骑士清算
+        unitTarget->m_extraAttacks = damage; //添加代码修复骑士清算
 }
 
 void Spell::EffectParry(SpellEffectIndex /*eff_idx*/)
@@ -4793,16 +4833,49 @@ void Spell::EffectDispelMechanic(SpellEffectIndex eff_idx)
 
 void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
 {
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-        { return; }
-    Player* _player = (Player*)m_caster;
+//删除错误的代码修复猎人召唤死亡的宠物    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+    Player* _player = m_caster->ToPlayer();//添加代码修复猎人召唤死亡的宠物
+
+    if (!_player || damage < 0)//添加代码修复猎人召唤死亡的宠物
+
+		        { return; }
+//删除错误的代码修复猎人召唤死亡的宠物    Player* _player = (Player*)m_caster;
     Pet* pet = _player->GetPet();
-    if (!pet)
-        { return; }
-    if (pet->IsAlive())
-        { return; }
-    if (damage < 0)
-        { return; }
+//删除错误的代码修复猎人召唤死亡的宠物    if (!pet)
+//删除错误的代码修复猎人召唤死亡的宠物        { return; }
+//删除错误的代码修复猎人召唤死亡的宠物    if (pet->IsAlive())
+//删除错误的代码修复猎人召唤死亡的宠物        { return; }
+//删除错误的代码修复猎人召唤死亡的宠物    if (damage < 0)
+//删除错误的代码修复猎人召唤死亡的宠物        { return; }
+
+    bool hadPet = true;//添加代码修复猎人召唤死亡的宠物
+
+    if (pet)//添加代码修复猎人召唤死亡的宠物
+    {//添加代码修复猎人召唤死亡的宠物
+        if (pet->IsAlive())//添加代码修复猎人召唤死亡的宠物
+            return;//添加代码修复猎人召唤死亡的宠物
+    }//添加代码修复猎人召唤死亡的宠物
+    else//添加代码修复猎人召唤死亡的宠物
+    {//添加代码修复猎人召唤死亡的宠物
+        Pet* newPet = new Pet;//添加代码修复猎人召唤死亡的宠物
+        if (!newPet->LoadPetFromDB(_player))//添加代码修复猎人召唤死亡的宠物
+        {//添加代码修复猎人召唤死亡的宠物
+            delete newPet;//添加代码修复猎人召唤死亡的宠物
+            return;//添加代码修复猎人召唤死亡的宠物
+        }//添加代码修复猎人召唤死亡的宠物
+        hadPet = false;//添加代码修复猎人召唤死亡的宠物
+    }//添加代码修复猎人召唤死亡的宠物
+
+    pet = _player->GetPet();//添加代码修复猎人召唤死亡的宠物
+    if (!pet || pet->IsAlive())//添加代码修复猎人召唤死亡的宠物
+        return;//添加代码修复猎人召唤死亡的宠物
+
+    if (hadPet)//添加代码修复猎人召唤死亡的宠物
+    {
+            float px, py, pz;//添加代码修复猎人召唤死亡的宠物
+            _player->GetClosePoint(px, py, pz, pet->GetObjectBoundingRadius(), _player->GetObjectBoundingRadius());//添加代码修复猎人召唤死亡的宠物
+            pet->NearTeleportTo(px, py, pz, PET_FOLLOW_ANGLE);//添加代码修复猎人召唤死亡的宠物
+    }
 
     pet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
     pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);

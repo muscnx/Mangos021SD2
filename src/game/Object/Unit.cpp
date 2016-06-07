@@ -259,7 +259,8 @@ Unit::Unit() :
     m_modMeleeHitChance = 0.0f;
     m_modRangedHitChance = 0.0f;
     m_modSpellHitChance = 0.0f;
-    m_baseSpellCritChance = 5;
+//删除错误的代码    m_baseSpellCritChance = 5;
+    m_baseSpellCritChance = 0; //添加代码修复图腾错误
 
     m_CombatTimer = 0;
     m_lastManaUseTimer = 0;
@@ -631,8 +632,16 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             { SetContestedPvP(attackedPlayer); }
     }
 
-    if (pVictim->GetTypeId() == TYPEID_UNIT && !((Creature*)pVictim)->IsPet() && !((Creature*)pVictim)->HasLootRecipient())
-        { ((Creature*)pVictim)->SetLootRecipient(this); }
+//删除代码修复50%伤害    if (pVictim->GetTypeId() == TYPEID_UNIT && !((Creature*)pVictim)->IsPet() && !((Creature*)pVictim)->HasLootRecipient())
+//删除代码修复50%伤害        { ((Creature*)pVictim)->SetLootRecipient(this); }
+    if (Creature* victim = pVictim->ToCreature())//添加代码修复50%伤害掉落
+    {//添加代码修复50%伤害掉落
+        if (!victim->IsPet() && !victim->HasLootRecipient())//添加代码修复50%伤害掉落
+            victim->SetLootRecipient(this);//添加代码修复50%伤害掉落
+
+        if (IsControlledByPlayer()) // more narrow: IsPet(), IsGuardian() ?//添加代码修复50%伤害掉落
+            victim->LowerPlayerDamageReq(health < damage ? health : damage);//添加代码修复50%伤害掉落
+    }//添加代码修复50%伤害掉落
 
     if (health <= damage)
     {
@@ -681,23 +690,43 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         /*
          *                      Generic Actions (ProcEvents, Combat-Log, Kill Rewards, Stop Combat)
          */
+        bool isRewardAllowed = true;//添加代码修复50%伤害掉落
+        if (Creature* creature = pVictim->ToCreature())//添加代码修复50%伤害掉落
+        {//添加代码修复50%伤害掉落
+            isRewardAllowed = creature->IsDamageEnoughForLootingAndReward();//添加代码修复50%伤害掉落
+            if (!isRewardAllowed)//添加代码修复50%伤害掉落
+                creature->SetLootRecipient(NULL);//添加代码修复50%伤害掉落
+        }//添加代码修复50%伤害掉落
+
         // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
         if (player_tap && player_tap != pVictim)
         {
             player_tap->ProcDamageAndSpell(pVictim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0);
 
-            WorldPacket data(SMSG_PARTYKILLLOG, (8 + 8));   // send event PARTY_KILL
-            data << player_tap->GetObjectGuid();            // player with killing blow
-            data << pVictim->GetObjectGuid();               // victim
+//删除代码修复50%伤害掉落            WorldPacket data(SMSG_PARTYKILLLOG, (8 + 8));   // send event PARTY_KILL
+//删除代码修复50%伤害掉落            data << player_tap->GetObjectGuid();            // player with killing blow
+//删除代码修复50%伤害掉落            data << pVictim->GetObjectGuid();               // victim
+            if (isRewardAllowed)//添加代码修复50%伤害掉落
+            {//添加代码修复50%伤害掉落
+                WorldPacket data(SMSG_PARTYKILLLOG, (8 + 8));   // send event PARTY_KILL//添加代码修复50%伤害掉落
+                data << player_tap->GetObjectGuid();            // player with killing blow//添加代码修复50%伤害掉落
+                data << pVictim->GetObjectGuid();               // victim//添加代码修复50%伤害掉落
 
-            if (group_tap)
-                { group_tap->BroadcastPacket(&data, false, group_tap->GetMemberGroup(player_tap->GetObjectGuid()), player_tap->GetObjectGuid()); }
+//删除代码修复50%伤害掉落            if (group_tap)
+//删除代码修复50%伤害掉落                { group_tap->BroadcastPacket(&data, false, group_tap->GetMemberGroup(player_tap->GetObjectGuid()), player_tap->GetObjectGuid()); }
+                if (group_tap)//添加代码修复50%伤害掉落
+                {//添加代码修复50%伤害掉落
+                    group_tap->BroadcastPacket(&data, false, group_tap->GetMemberGroup(player_tap->GetObjectGuid()), player_tap->GetObjectGuid());//添加代码修复50%伤害掉落
+                }//添加代码修复50%伤害掉落
 
-            player_tap->SendDirectMessage(&data);
+//删除代码修复50%伤害掉落            player_tap->SendDirectMessage(&data);
+                player_tap->SendDirectMessage(&data);//添加代码修复50%伤害掉落
+            }//添加代码修复50%伤害掉落
         }
 
         // Reward player, his pets, and group/raid members
-        if (player_tap != pVictim)
+//删除代码修复50%伤害掉落        if (player_tap != pVictim)
+        if (isRewardAllowed && player_tap != pVictim)//添加代码修复50%伤害掉落
         {
             if (group_tap)
                 { group_tap->RewardGroupAtKill(pVictim, player_tap); }
@@ -1019,15 +1048,16 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
         { mapInstance->OnCreatureDeath(victim); }
 
     if (responsiblePlayer)                                  // killedby Player, inform BG
-        if (BattleGround* bg = responsiblePlayer->GetBattleGround())
+	{//添加代码修复审判
+	        if (BattleGround* bg = responsiblePlayer->GetBattleGround())
         {
             bg->HandleKillUnit(victim, responsiblePlayer);
-
+		}
             // Used by Eluna
 #ifdef ENABLE_ELUNA
             sEluna->OnCreatureKill(responsiblePlayer, victim);
 #endif /* ENABLE_ELUNA */
-        }
+	}//添加代码修复审判
 
     // Notify the outdoor pvp script
     if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(responsiblePlayer ? responsiblePlayer->GetCachedZoneId() : GetZoneId()))
@@ -1309,13 +1339,62 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
     // damage bonus (per damage class)
     switch (spellInfo->DmgClass)
     {
-            // Melee and Ranged Spells
+        // Melee and Ranged Spells
         case SPELL_DAMAGE_CLASS_RANGED:
+        { //修复骑士审判等技能的伤害加成
+            // Calculate damage bonus //修复骑士审判等技能的伤害加成
+            switch (spellInfo->Id) //修复骑士审判等技能的伤害加成
+            { //修复骑士审判等技能的伤害加成
+                // Paladin Hammer of Wrath receive benefit from Spell Damage and Healing //修复骑士审判等技能的伤害加成
+                case 24274:    case 24275:    case 24239: //修复骑士审判等技能的伤害加成
+                { //修复骑士审判等技能的伤害加成
+                    damage = SpellDamageBonusDone(pVictim, spellInfo, damage, SPELL_DIRECT_DAMAGE); //修复骑士审判等技能的伤害加成
+                    damage = pVictim->SpellDamageBonusTaken(this, spellInfo, damage, SPELL_DIRECT_DAMAGE); //修复骑士审判等技能的伤害加成
+                    break; //修复骑士审判等技能的伤害加成
+                } //修复骑士审判等技能的伤害加成
+                default: //修复骑士审判等技能的伤害加成
+                { //修复骑士审判等技能的伤害加成
+                    damage = MeleeDamageBonusDone(pVictim, damage, attackType, spellInfo, SPELL_DIRECT_DAMAGE); //修复骑士审判等技能的伤害加成
+                    damage = pVictim->MeleeDamageBonusTaken(this, damage, attackType, spellInfo, SPELL_DIRECT_DAMAGE); //修复骑士审判等技能的伤害加成
+                } //修复骑士审判等技能的伤害加成
+            break; //修复骑士审判等技能的伤害加成
+            } //修复骑士审判等技能的伤害加成
+
+            // if crit add critical bonus //修复骑士审判等技能的伤害加成
+            if (crit) //修复骑士审判等技能的伤害加成
+            { //修复骑士审判等技能的伤害加成
+                damageInfo->HitInfo |= SPELL_HIT_TYPE_CRIT; //修复骑士审判等技能的伤害加成
+                damage = SpellCriticalDamageBonus(spellInfo, damage, pVictim); //修复骑士审判等技能的伤害加成
+            } //修复骑士审判等技能的伤害加成
+        } //修复骑士审判等技能的伤害加成
+        break; //修复骑士审判等技能的伤害加成
         case SPELL_DAMAGE_CLASS_MELEE:
         {
             // Calculate damage bonus
-            damage = MeleeDamageBonusDone(pVictim, damage, attackType, spellInfo, SPELL_DIRECT_DAMAGE);
-            damage = pVictim->MeleeDamageBonusTaken(this, damage, attackType, spellInfo, SPELL_DIRECT_DAMAGE);
+//删除错误的代码修复骑士审判等技能的伤害加成            damage = MeleeDamageBonusDone(pVictim, damage, attackType, spellInfo, SPELL_DIRECT_DAMAGE);
+//删除错误的代码修复骑士审判等技能的伤害加成            damage = pVictim->MeleeDamageBonusTaken(this, damage, attackType, spellInfo, SPELL_DIRECT_DAMAGE);
+            switch (spellInfo->Id) //修复骑士审判等技能的伤害加成
+            { //修复骑士审判等技能的伤害加成
+                // Paladin //修复骑士审判等技能的伤害加成
+                // Judgement of Command receive benefit from Spell Damage and Healing //修复骑士审判等技能的伤害加成
+                case 20467:    case 20963:    case 20964:    case 20965:    case 20966: //修复骑士审判等技能的伤害加成
+                // Seal of Command PROC receive benefit from Spell Damage and Healing //修复骑士审判等技能的伤害加成
+                case 20424: //修复骑士审判等技能的伤害加成
+                //	Seal of Righteousness Dummy Proc receive benefit from Spell Damage and Healing //修复骑士审判等技能的伤害加成
+                case 25735:	   case 25736:	  case 25737:    case 25738:    case 25739:     case 25740: //修复骑士审判等技能的伤害加成
+                case 25713:    case 25742: //修复骑士审判等技能的伤害加成
+                    { //修复骑士审判等技能的伤害加成
+                        damage = SpellDamageBonusDone(pVictim, spellInfo, damage, SPELL_DIRECT_DAMAGE); //修复骑士审判等技能的伤害加成
+                        damage = pVictim->SpellDamageBonusTaken(this, spellInfo, damage, SPELL_DIRECT_DAMAGE); //修复骑士审判等技能的伤害加成
+                        break; //修复骑士审判等技能的伤害加成
+                    } //修复骑士审判等技能的伤害加成
+                default: //修复骑士审判等技能的伤害加成
+                    { //修复骑士审判等技能的伤害加成
+                        damage = MeleeDamageBonusDone(pVictim, damage, attackType, spellInfo, SPELL_DIRECT_DAMAGE); //修复骑士审判等技能的伤害加成
+                        damage = pVictim->MeleeDamageBonusTaken(this, damage, attackType, spellInfo, SPELL_DIRECT_DAMAGE); //修复骑士审判等技能的伤害加成
+                    } //修复骑士审判等技能的伤害加成
+            break; //修复骑士审判等技能的伤害加成
+            } //修复骑士审判等技能的伤害加成
 
             // if crit add critical bonus
             if (crit)
@@ -1753,7 +1832,8 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
                 // uint32 resist;
                 // CalcAbsorbResist(pVictim, SpellSchools(spellProto->School), SPELL_DIRECT_DAMAGE, damage, &absorb, &resist);
                 // damage-=absorb + resist;
-
+                //apply bonus damage from existing auras with id = 14 (SPELL_AURA_MOD_DAMAGE_TAKEN) //添加代码修复安抚心灵的仇恨
+                damage += SpellBaseDamageBonusTaken(GetSpellSchoolMask(i_spellProto)); //添加代码修复安抚心灵的仇恨
                 pVictim->DealDamageMods(this, damage, NULL);
 
                 WorldPacket data(SMSG_SPELLDAMAGESHIELD, (8 + 8 + 4 + 4));
@@ -2096,14 +2176,16 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
 
         // not recent extra attack only at any non extra attack (melee spell case)
         if (!extra && extraAttacks)
-        {
-            while (m_extraAttacks)
-            {
-                AttackerStateUpdate(pVictim, BASE_ATTACK, true);
-                if (m_extraAttacks > 0)
-                    { --m_extraAttacks; }
-            }
-        }
+//去掉错误的代码        {
+//去掉错误的代码            while (m_extraAttacks)
+//去掉错误的代码            {
+//去掉错误的代码                AttackerStateUpdate(pVictim, BASE_ATTACK, true);
+//去掉错误的代码                if (m_extraAttacks > 0)
+//去掉错误的代码                    { --m_extraAttacks; }
+//去掉错误的代码            }
+//去掉错误的代码        }
+            HandleProcExtraAttackFor(pVictim); //添加代码修复风怒武器
+
         return;
     }
 
@@ -2127,13 +2209,21 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
 
     // extra attack only at any non extra attack (normal case)
     if (!extra && extraAttacks)
+        HandleProcExtraAttackFor(pVictim); //添加代码修复风怒武器
+} //添加代码修复风怒武器
+
+void Unit::HandleProcExtraAttackFor(Unit* victim) //添加代码修复风怒武器
+{ //添加代码修复风怒武器
+    while (m_extraAttacks) //添加代码修复风怒武器
     {
-        while (m_extraAttacks)
-        {
-            AttackerStateUpdate(pVictim, BASE_ATTACK, true);
-            if (m_extraAttacks > 0)
-                { --m_extraAttacks; }
-        }
+//去掉错误的代码        while (m_extraAttacks)
+//去掉错误的代码        {
+//去掉错误的代码            AttackerStateUpdate(pVictim, BASE_ATTACK, true);
+//去掉错误的代码            if (m_extraAttacks > 0)
+//去掉错误的代码                { --m_extraAttacks; }
+//去掉错误的代码        }
+        --m_extraAttacks; //添加代码修复风怒武器
+        AttackerStateUpdate(victim, BASE_ATTACK, true); //添加代码修复风怒武器
     }
 }
 
@@ -3782,6 +3872,21 @@ void Unit::RemoveAura(uint32 spellId, SpellEffectIndex effindex, Aura* except)
             { ++iter; }
     }
 }
+
+void Unit::RemoveAurasByCaster(ObjectGuid casterGuid)//添加代码调整脱战机制
+{//添加代码调整脱战机制
+    for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)//添加代码调整脱战机制
+    {//添加代码调整脱战机制
+        if (iter->second->GetCasterGuid() == casterGuid)//添加代码调整脱战机制
+        {//添加代码调整脱战机制
+            RemoveSpellAuraHolder(iter->second);//添加代码调整脱战机制
+            iter = m_spellAuraHolders.begin();//添加代码调整脱战机制
+        }//添加代码调整脱战机制
+        else//添加代码调整脱战机制
+            { ++iter; }//添加代码调整脱战机制
+    }//添加代码调整脱战机制
+}//添加代码调整脱战机制
+
 void Unit::RemoveAurasByCasterSpell(uint32 spellId, ObjectGuid casterGuid)
 {
     SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(spellId);
@@ -4134,6 +4239,9 @@ void Unit::RemoveAllAurasOnEvade()
         RemoveSpellAuraHolder(iter->second, AURA_REMOVE_BY_DEFAULT);
         iter = m_spellAuraHolders.begin();
     }
+
+    if ((GetTypeId() == TYPEID_UNIT) && HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED))//添加代码修复脱战机制
+        { RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED); }//添加代码修复脱战机制
 }
 
 void Unit::DelaySpellAuraHolder(uint32 spellId, int32 delaytime, ObjectGuid casterGuid)
@@ -5470,7 +5578,14 @@ int32 Unit::SpellBonusWithCoeffs(Unit* pCaster, SpellEntry const* spellProto, in
     else 
         { coeff = CalculateDefaultCoefficient(spellProto, damagetype); }
 
-    float LvlPenalty = CalculateLevelPenalty(spellProto);
+//删除错误的代码修复骑士圣光收益太低    float LvlPenalty = CalculateLevelPenalty(spellProto);
+    float LvlPenalty = CalculateLevelPenalty(spellProto); //修复骑士圣光收益过低
+    //float LvlPenalty = CalculateLevelPenalty(spellProto);//[-ZERO] not need. http://wowwiki.wikia.com/wiki/Patch_2.0.1//添加代码修复低等级技能收益太低
+//删除代码修复低等级技能收益太低    float LvlPenalty = 1.0f;//添加代码修复低等级技能收益太低
+
+    // Holy Light and Seal of Righteousness PROC and Flash of Light receive benefit from Spell Damage and Healing too low. //修复骑士圣光收益过低
+    if (spellProto->SpellFamilyName == SPELLFAMILY_PALADIN && (spellProto->SpellIconID == 25 || spellProto->SpellIconID == 70 || spellProto->SpellIconID == 242)) //修复骑士圣光收益过低
+         LvlPenalty = 1.0f; //修复骑士圣光收益过低
 
     // Spellmod SpellDamage
     if (Player* modOwner = GetSpellModOwner())
@@ -6529,6 +6644,9 @@ void Unit::ClearInCombat()
         if (cThis->GetCreatureInfo()->UnitFlags & UNIT_FLAG_OOC_NOT_ATTACKABLE && !(cThis->GetTemporaryFactionFlags() & TEMPFACTION_TOGGLE_OOC_NOT_ATTACK))
             { SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE); }
 
+//删除错误的代码修复脱战机制        if (cThis->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED))//添加代码修改脱战机制
+//删除错误的代码修复脱战机制            { RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED); }//添加代码修改脱战机制
+
         clearUnitState(UNIT_STAT_ATTACK_PLAYER);
     }
 }
@@ -7366,8 +7484,9 @@ bool Unit::SelectHostileTarget()
     }
 
     // no target but something prevent go to evade mode
-    if (!IsInCombat() || HasAuraType(SPELL_AURA_MOD_TAUNT))
-        { return false; }
+//删除代码修复假战斗状态逃避    if (!IsInCombat() || HasAuraType(SPELL_AURA_MOD_TAUNT))
+    if (!IsInCombat() || HasAuraType(SPELL_AURA_MOD_TAUNT) || m_dummyCombatState)//添加代码修复假战斗状态逃避
+	        { return false; }
 
     // last case when creature don't must go to evade mode:
     // it in combat but attacker not make any damage and not enter to aggro radius to have record in threat list

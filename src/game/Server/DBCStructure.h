@@ -921,6 +921,14 @@ struct SpellEntry
         */
         inline bool HasAttribute(SpellAttributesEx4 attribute) const { return AttributesEx4 & attribute; }
 
+        inline bool HasSpellEffect(SpellEffects effect) const //Ìí¼Ó´úÂëĞŞ¸´·çÅ­ÎäÆ÷
+        { //Ìí¼Ó´úÂëĞŞ¸´·çÅ­ÎäÆ÷
+            for (uint8 i = EFFECT_INDEX_0; i <= EFFECT_INDEX_2; ++i) //Ìí¼Ó´úÂëĞŞ¸´·çÅ­ÎäÆ÷
+                if (Effect[i] == effect) //Ìí¼Ó´úÂëĞŞ¸´·çÅ­ÎäÆ÷
+                    return true; //Ìí¼Ó´úÂëĞŞ¸´·çÅ­ÎäÆ÷
+            return false; //Ìí¼Ó´úÂëĞŞ¸´·çÅ­ÎäÆ÷
+        } //Ìí¼Ó´úÂëĞŞ¸´·çÅ­ÎäÆ÷
+
     private:
         // prevent creating custom entries (copy data from original in fact)
         SpellEntry(SpellEntry const&);                      // DON'T must have implementation

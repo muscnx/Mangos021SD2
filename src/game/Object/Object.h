@@ -521,7 +521,8 @@ class WorldObject : public Object
         void GetClosePoint(float& x, float& y, float& z, float bounding_radius, float distance2d = 0.0f, float angle = 0.0f, const WorldObject* obj = NULL) const
         {
             // angle calculated from current orientation
-            GetNearPoint(obj, x, y, z, bounding_radius, distance2d + GetObjectBoundingRadius() + bounding_radius, GetOrientation() + angle);
+//É¾³ı´íÎóµÄ´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï            GetNearPoint(obj, x, y, z, bounding_radius, distance2d + GetObjectBoundingRadius() + bounding_radius, GetOrientation() + angle);
+            GetNearPoint(obj, x, y, z, bounding_radius, distance2d, GetOrientation() + angle);//Ìí¼Ó´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï
         }
         /** Gives a "free" spot for a searcher in contact-range of "this" (including bounding-radius calculation)
          * @param x, y, z           -           position for the found spot

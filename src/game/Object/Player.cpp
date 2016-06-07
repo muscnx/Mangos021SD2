@@ -1531,6 +1531,12 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             SendTransferAbortedByLockStatus(mEntry, lockStatus, miscRequirement);
             return false;
         }
+//删除错误的代码修复复活只能在副本        if (IsDead())   // rare case of teleporting the player into an instance with no areatrigger participation
+        if (IsDead() && mEntry->IsDungeon())    // rare case of teleporting the player into an instance with no areatrigger participation//添加代码修复复活只能在副本
+        {
+            ResurrectPlayer(0.5f);
+            SpawnCorpseBones();
+        }
     }
 
     // if we were on a transport, leave
@@ -1571,8 +1577,23 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         if (!(options & TELE_TO_NOT_UNSUMMON_PET))
         {
             // same map, only remove pet if out of range for new position
-            if (pet && !pet->IsWithinDist3d(x, y, z, GetMap()->GetVisibilityDistance()))
-                { UnsummonPetTemporaryIfAny(); }
+//删除错误的代码修复猎人召唤死亡的宠物            if (pet && !pet->IsWithinDist3d(x, y, z, GetMap()->GetVisibilityDistance()))
+//删除错误的代码修复猎人召唤死亡的宠物                { UnsummonPetTemporaryIfAny(); }
+            if (pet)//添加代码修复猎人召唤死亡的宠物
+            {//添加代码修复猎人召唤死亡的宠物
+                if (!pet->IsWithinDist3d(x, y, z, GetMap()->GetVisibilityDistance()))//添加代码修复猎人召唤死亡的宠物
+                {//添加代码修复猎人召唤死亡的宠物
+                    if (pet->IsAlive())//添加代码修复猎人召唤死亡的宠物
+                    {//添加代码修复猎人召唤死亡的宠物
+                        UnsummonPetTemporaryIfAny();//添加代码修复猎人召唤死亡的宠物
+                    }//添加代码修复猎人召唤死亡的宠物
+                    else//添加代码修复猎人召唤死亡的宠物
+                    {//添加代码修复猎人召唤死亡的宠物
+                        pet->Unsummon(PET_SAVE_NOT_IN_SLOT);//添加代码修复猎人召唤死亡的宠物
+                        pet = GetPet();//添加代码修复猎人召唤死亡的宠物
+                    }//添加代码修复猎人召唤死亡的宠物
+                }//添加代码修复猎人召唤死亡的宠物
+            }//添加代码修复猎人召唤死亡的宠物
         }
 
         if (!(options & TELE_TO_NOT_LEAVE_COMBAT))
@@ -1637,7 +1658,18 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             // remove pet on map change
             if (pet)
-                { UnsummonPetTemporaryIfAny(); }
+//删除错误的代码修复猎人召唤死亡的宠物                { UnsummonPetTemporaryIfAny(); }
+            {//添加代码修复猎人召唤死亡的宠物
+                if (pet->IsAlive())//添加代码修复猎人召唤死亡的宠物
+                {//添加代码修复猎人召唤死亡的宠物
+                    UnsummonPetTemporaryIfAny();//添加代码修复猎人召唤死亡的宠物
+                }//添加代码修复猎人召唤死亡的宠物
+                else//添加代码修复猎人召唤死亡的宠物
+                {//添加代码修复猎人召唤死亡的宠物
+                    pet->Unsummon(PET_SAVE_NOT_IN_SLOT);//添加代码修复猎人召唤死亡的宠物
+                    pet = GetPet();//添加代码修复猎人召唤死亡的宠物
+                }//添加代码修复猎人召唤死亡的宠物
+            }//添加代码修复猎人召唤死亡的宠物
 
             // remove all dyn objects
             RemoveAllDynObjects();
@@ -4716,7 +4748,9 @@ float Player::GetTotalBaseModValue(BaseModGroup modGroup) const
 
 uint32 Player::GetShieldBlockValue() const
 {
-    float value = (m_auraBaseMod[SHIELD_BLOCK_VALUE][FLAT_MOD] + GetStat(STAT_STRENGTH) / 20 - 1) * m_auraBaseMod[SHIELD_BLOCK_VALUE][PCT_MOD];
+//删除错误的代码    float value = (m_auraBaseMod[SHIELD_BLOCK_VALUE][FLAT_MOD] + GetStat(STAT_STRENGTH) / 20 - 1) * m_auraBaseMod[SHIELD_BLOCK_VALUE][PCT_MOD];
+    float value = (m_auraBaseMod[SHIELD_BLOCK_VALUE][FLAT_MOD] + GetStat(STAT_STRENGTH) / 0.5f - 10) * m_auraBaseMod[SHIELD_BLOCK_VALUE][PCT_MOD]; //添加代码强化盾牌格挡
+
 
     value = (value < 0) ? 0 : value;
 
@@ -14034,9 +14068,11 @@ bool Player::IsTappedByMeOrMyGroup(Creature* creature)
  * Called from Object::BuildValuesUpdate */
 bool Player::isAllowedToLoot(Creature* creature)
 {
-    /* Nobody tapped the monster (solo kill by another NPC) */
-    if (!creature->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED))
-        { return false; }
+//删除代码修复50%伤害    /* Nobody tapped the monster (solo kill by another NPC) */
+//删除代码修复50%伤害    if (!creature->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED))
+    /* Nobody tapped the monster (kill either solo or mostly by another NPC) *///添加代码修复50%伤害掉落
+    if (!creature->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED) || !creature->IsDamageEnoughForLootingAndReward())//添加代码修复50%伤害掉落
+	        { return false; }
 
     /* If we there is a loot recipient, assign it to recipient */
     if (Player* recipient = creature->GetLootRecipient())

@@ -2055,6 +2055,7 @@ bool Map::GetHeightInRange(float x, float y, float& z, float maxSearchDist /*= 4
 {
     float height, vmapHeight, mapHeight;
     vmapHeight = VMAP_INVALID_HEIGHT_VALUE;
+    mapHeight = INVALID_HEIGHT_VALUE;//Ìí¼Ó´úÂëÐÞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï
 
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
     if (!vmgr->isLineOfSightCalcEnabled())

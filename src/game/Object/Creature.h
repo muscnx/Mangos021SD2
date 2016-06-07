@@ -682,6 +682,9 @@ class Creature : public Unit
         Player* GetLootRecipient() const;                   // use group cases as prefered
         Group* GetGroupLootRecipient() const;
         bool IsTappedBy(Player const* player) const;
+        bool IsDamageEnoughForLootingAndReward() const { return m_PlayerDamageReq == 0; }//Ìí¼ÓµôÂäĞŞ¸´50%ÉËº¦µôÂä
+        void LowerPlayerDamageReq(uint32 unDamage);//Ìí¼ÓµôÂäĞŞ¸´50%ÉËº¦µôÂä
+        void ResetPlayerDamageReq() { m_PlayerDamageReq = GetHealth() / 2; }//Ìí¼ÓµôÂäĞŞ¸´50%ÉËº¦µôÂä
 
         /**
         * function indicating whether the whether the creature has a looter recipient defined (either a group ID, either a player GUID).
@@ -729,7 +732,8 @@ class Creature : public Unit
 
         bool IsVisibleInGridForPlayer(Player* pl) const override;
 
-        void RemoveCorpse();
+//É¾³ı´úÂëĞŞ¸´Ñ±»¯Ï¡ÓĞ³èÎïå´»ú        void RemoveCorpse();
+        void RemoveCorpse(bool inPlace = false);//Ìí¼Ó´úÂëĞŞ¸´Ñ±»¯Ï¡ÓĞ³èÎïå´»ú
         bool IsDeadByDefault() const { return m_IsDeadByDefault; };
 
         void ForcedDespawn(uint32 timeMSToDespawn = 0);
@@ -840,6 +844,7 @@ class Creature : public Unit
         MovementGeneratorType m_defaultMovementType;
         Cell m_currentCell;                                 // store current cell where creature listed
         uint32 m_equipmentId;
+        uint32 m_PlayerDamageReq;//Ìí¼Ó´úÂëĞŞ¸´50%ÉËº¦µôÂä
 
         // below fields has potential for optimization
         bool m_AlreadyCallAssistance;

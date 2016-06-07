@@ -7154,11 +7154,17 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
         {
             GameObject* pGo = NULL;
 
-            MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*source, m_value1, m_value2);
-            MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> searcher(pGo, go_check);
+//删除错误的代码解决宕机            MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*source, m_value1, m_value2);
+//删除错误的代码解决宕机            MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> searcher(pGo, go_check);
 
-            Cell::VisitGridObjects(source, searcher, m_value2);
+//删除错误的代码解决宕机            Cell::VisitGridObjects(source, searcher, m_value2);
+            if (source)//添加代码修复宕机
+            {//添加代码修复宕机
+                MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*source, m_value1, m_value2);//添加代码修复宕机
+                MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> searcher(pGo, go_check);//添加代码修复宕机
 
+                Cell::VisitGridObjects(source, searcher, m_value2);//添加代码修复宕机
+            }//添加代码修复宕机
             return pGo;
         }
         default:

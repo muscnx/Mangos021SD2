@@ -378,6 +378,8 @@ enum RealmZone
     REALM_ZONE_CN9           = 29                           // basic-Latin at create, any at login
 };
 
+typedef std::unordered_map<uint32, WorldSession*> SessionMap;//添加代码修复使用gm命令崩溃宕机
+
 /// Storage class for commands issued for delayed execution
 struct CliCommandHolder
 {

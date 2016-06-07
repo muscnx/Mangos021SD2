@@ -593,13 +593,16 @@ enum MovementFlags
     MOVEFLAG_FALLING = 0x00002000,
     MOVEFLAG_FALLINGFAR = 0x00004000,
     MOVEFLAG_SWIMMING = 0x00200000,               // appears with fly flag also
-    MOVEFLAG_ASCENDING = 0x00400000,               // [-ZERO] is it really need and correct value
+//删除代码修复npc返回原始坐标    MOVEFLAG_ASCENDING = 0x00400000,               // [-ZERO] is it really need and correct value
+    MOVEFLAG_SPLINE_ENABLED = 0x00400000,//添加代码修复npc返回原始坐标
     MOVEFLAG_CAN_FLY = 0x00800000,               // [-ZERO] is it really need and correct value
     MOVEFLAG_FLYING = 0x01000000,               // [-ZERO] is it really need and correct value
 
     MOVEFLAG_ONTRANSPORT = 0x02000000,               // Used for flying on some creatures
-    MOVEFLAG_SPLINE_ELEVATION = 0x04000000,               // used for flight paths
-    MOVEFLAG_SPLINE_ENABLED = 0x08000000,               // used for flight paths
+//删除代码修复npc返回原始坐标    MOVEFLAG_SPLINE_ELEVATION = 0x04000000,               // used for flight paths
+//删除代码修复npc返回原始坐标    MOVEFLAG_SPLINE_ENABLED = 0x08000000,               // used for flight paths
+    MOVEFLAG_SPLINE_ELEVATION = 0x04000000,               // [-ZERO] checkme! used for flight paths//添加代码修复npc返回原始坐标
+    //MOVEFLAG_SPLINE_ENABLED = 0x08000000,               // [-ZERO] wrong!//添加代码修复npc返回原始坐标
     MOVEFLAG_WATERWALKING = 0x10000000,               // prevent unit from falling through water
     MOVEFLAG_SAFE_FALL = 0x20000000,               // active rogue safe fall spell (passive)
     MOVEFLAG_HOVER = 0x40000000
@@ -1971,6 +1974,10 @@ class Unit : public WorldObject
          * @param durabilityLoss whether or not durability loss should happen
          */
         void DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss);
+        /** //添加代码修复风怒武器
+        * Handles all extra attacks set up by a spell //添加代码修复风怒武器
+        */ //添加代码修复风怒武器
+        void HandleProcExtraAttackFor(Unit* victim); //添加代码修复风怒武器
 
         /**
          * Calculates how much damage a spell should do, it will do some bonus damage according
@@ -3242,6 +3249,11 @@ class Unit : public WorldObject
          */
         void RemoveAurasDueToItemSpell(Item* castItem, uint32 spellId);
         /** 
+         * Removes all \ref Aura s applied by spells casted by a certain \ref Player / \ref Unit//添加代码修复脱战机制
+         * @param casterGuid \ref ObjectGuid of the caster//添加代码修复脱战机制
+         *///添加代码修复脱战机制
+        void RemoveAurasByCaster(ObjectGuid casterGuid);//添加代码修复脱战机制
+        /** //添加代码修复脱战机制
          * Removes all \ref Aura s that a certain spell cast by a certain \ref Player / \ref Unit
          * would cause via it's effects (up to 3 of them per \ref Aura)
          * @param spellId id of the \ref Spell causing the \ref Aura s you would like to remove

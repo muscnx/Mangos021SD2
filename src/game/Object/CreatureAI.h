@@ -138,8 +138,7 @@ class CreatureAI
          * Called for reaction at stopping attack at no attackers or targets
          * This is called usually in Unit::SelectHostileTarget, if no more target exists
          */
-//É¾³ı´úÂëĞŞ¸´50%ÉËº¦        virtual void EnterEvadeMode() {}
-        virtual void EnterEvadeMode() { m_creature->ResetPlayerDamageReq(); }//Ìí¼Ó´úÂëĞŞ¸´50%ÉËº¦
+        virtual void EnterEvadeMode() { m_creature->ResetPlayerDamageReq(); }//Ìí¼Ó´úÂëĞŞ¸´ÉËº¦³¬¹ı50%²ÅÓĞµôÂä
 
         /**
          * Called at reaching home after MoveTargetedHome

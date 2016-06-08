@@ -254,9 +254,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     uint32 savedpower = fields[14].GetUInt32();
 
     // set current pet as current
-//É¾³ı´íÎóµÄ´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï    // 0=current
-//É¾³ı´íÎóµÄ´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï    // 1..MAX_PET_STABLES in stable slot
-//É¾³ı´íÎóµÄ´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï    // PET_SAVE_NOT_IN_SLOT(100) = not stable slot (summoning))
     // 0 = current//Ìí¼Ó´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï
     // 1..MAX_PET_STABLES = in stable slot//Ìí¼Ó´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï
     // PET_SAVE_NOT_IN_SLOT(100) = not stable slot (summoning) or hunter pet dead//Ìí¼Ó´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï
@@ -464,7 +461,6 @@ void Pet::SavePetToDB(PetSaveMode mode)
         savePet.addUInt32(uint32(mode));
         savePet.addString(m_name);
         savePet.addUInt32(uint32(HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME) ? 0 : 1));
-//É¾³ı´íÎóµÄ´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï        savePet.addUInt32((curhealth < 1 ? 1 : curhealth));
         savePet.addUInt32((curhealth));//Ìí¼Ó´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï
         savePet.addUInt32(curpower);
         savePet.addUInt32(GetPower(POWER_HAPPINESS));
@@ -566,7 +562,6 @@ void Pet::Update(uint32 update_diff, uint32 diff)
     {
         case CORPSE:
         {
-//É¾³ı´íÎóµÄ´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï            Unsummon(PET_SAVE_NOT_IN_SLOT);
 
             if (getPetType() != HUNTER_PET || m_corpseRemoveTime <= time(NULL))//Ìí¼Ó´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï
             {//Ìí¼Ó´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï
@@ -1008,7 +1003,6 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
 
     uint32 guid = creature->GetMap()->GenerateLocalLowGuid(HIGHGUID_PET);
 
-//É¾³ı´íÎóµÄ´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï    BASIC_LOG("Create pet");
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
     if (!Create(guid, pos, creature->GetCreatureInfo(), pet_number))
         { return false; }
@@ -2094,8 +2088,6 @@ PetDatabaseStatus Pet::GetStatusFromDB(Player* owner)//Ìí¼Ó´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµ
     QueryResult* result;//Ìí¼Ó´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï
                                       //      0   1      2      3        4      5    6           7              8        9           10    11    12       13         14       15            16      17              18        19                 20                 21              22
     result = CharacterDatabase.PQuery("SELECT id, entry, owner, modelid, level, exp, Reactstate, loyaltypoints, loyalty, trainpoint, slot, name, renamed, curhealth, curmana, curhappiness, abdata, TeachSpelldata, savetime, resettalents_cost, resettalents_time, CreatedBySpell, PetType "
-//É¾³ı´íÎóµÄ´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï                                      "FROM character_pet WHERE owner = '%u' AND (slot = '%u') ",
-//É¾³ı´íÎóµÄ´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï                                      ownerid, PET_SAVE_AS_CURRENT);
                                       "FROM character_pet WHERE owner = %u AND (slot = %u OR slot > %u)",//Ìí¼Ó´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï
                                       ownerid, PET_SAVE_AS_CURRENT, PET_SAVE_LAST_STABLE_SLOT);//Ìí¼Ó´úÂëĞŞ¸´ÁÔÈËÕÙ»½ËÀÍöµÄ³èÎï
 

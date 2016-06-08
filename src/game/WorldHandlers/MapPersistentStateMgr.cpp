@@ -995,7 +995,6 @@ void MapPersistentStateManager::LoadCreatureRespawnTimes()
             { continue; }
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(data->mapid);
-//删除代码修复副本复位不正常        if (!mapEntry || (instanceId && (mapId != data->mapid || mapEntry->Instanceable())))
         if (!mapEntry || (instanceId && (mapId != data->mapid || !mapEntry->Instanceable())))//添加代码修复副本复位不正常
 	            { continue; }
 

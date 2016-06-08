@@ -518,7 +518,6 @@ void Player::UpdateAllSpellCritChances()
 void Player::UpdateManaRegen()
 {
     // Mana regen from spirit
-//删除错误的代码修复法师唤醒    float power_regen = OCTRegenMPPerSpirit() / 2.0f;
     float power_regen = OCTRegenMPPerSpirit();//添加代码修复法师唤醒
     // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT aura on spirit base regen
     power_regen *= GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_POWER_REGEN_PERCENT, POWER_MANA);

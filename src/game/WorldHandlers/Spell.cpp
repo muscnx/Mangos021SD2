@@ -1058,7 +1058,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         caster->DealSpellDamage(&damageInfo, true);
 
         // Bloodthirst
-//删除错误的代码        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000002000000))
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && //添加代码修复嗜血和致死打击
             m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000002000000) && //添加代码修复嗜血和致死打击
             m_spellInfo->SpellIconID == 38) //添加代码修复嗜血和致死打击
@@ -3000,7 +2999,6 @@ void Spell::update(uint32 difftime)
     // update pointers based at it's GUIDs
     UpdatePointers();
 
-//删除错误的代码修复盗贼消失和猎人假死    if (m_targets.getUnitTargetGuid() && !m_targets.getUnitTarget())
     if (!m_targets.getUnitTargetGuid().IsEmpty() && !m_targets.getUnitTarget())//添加代码修复盗贼消失和猎人假死
     {
         cancel();
@@ -3060,7 +3058,6 @@ void Spell::update(uint32 difftime)
 
                     // check for incapacitating player states
                     if (m_caster->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
-//删除代码修复不要中断某些法术                        { cancel(); }
                     {//添加代码修复不要中断某些代码
                         // certain channel spells are not interrupted//添加代码修复不要中断某些代码
                         if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNELED_1) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_UNK28))//添加代码修复不要中断某些代码
@@ -3763,7 +3760,6 @@ void Spell::TakePower()
 
     Powers powerType = Powers(m_spellInfo->powerType);
 
-//删除错误的代码修复掉怒气和能量的问题    m_caster->ModifyPower(powerType, -(int32)m_powerCost);
     bool hit = true;//添加代码修复掉怒气和能量的问题
     for (uint8 j = 0; j < 3; ++j)//添加代码修复掉怒气和能量的问题
     {//添加代码修复掉怒气和能量的问题
@@ -4984,10 +4980,6 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELL_EFFECT_SUMMON_DEAD_PET:
             {
                 Creature* pet = m_caster->GetPet();
-//删除错误的代码修复猎人召唤死亡的宠物                if (!pet)
-//删除错误的代码修复猎人召唤死亡的宠物                    { return SPELL_FAILED_NO_PET; }
-
-//删除错误的代码修复猎人召唤死亡的宠物                if (pet->IsAlive())
                 if (pet && pet->IsAlive())//添加代码修复猎人召唤死亡的宠物
 	                    { return SPELL_FAILED_ALREADY_HAVE_SUMMON; }
 
@@ -5029,15 +5021,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                 Player* plr = m_caster->ToPlayer();//添加代码修复猎人召唤死亡的宠物
                 if (m_caster->GetPetGuid())                 // let warlock do a replacement summon
                 {
-//删除错误的代码修复猎人召唤死亡的宠物                    Pet* pet = ((Player*)m_caster)->GetPet();
                     Pet* pet = m_caster->GetPet();//添加代码修复猎人召唤死亡的宠物
 
-//删除错误的代码修复猎人召唤死亡的宠物                    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_WARLOCK)
-//删除错误的代码修复猎人召唤死亡的宠物                    {
-//删除错误的代码修复猎人召唤死亡的宠物                        if (strict)                         // Summoning Disorientation, trigger pet stun (cast by pet so it doesn't attack player)
-//删除错误的代码修复猎人召唤死亡的宠物                            { pet->CastSpell(pet, 32752, true, NULL, NULL, pet->GetObjectGuid()); }
-//删除错误的代码修复猎人召唤死亡的宠物                    }
-//删除错误的代码修复猎人召唤死亡的宠物                    else
                     if (plr && m_caster->getClass() != CLASS_WARLOCK)//添加代码修复猎人召唤死亡的宠物
 	                        { return SPELL_FAILED_ALREADY_HAVE_SUMMON; }
                 }

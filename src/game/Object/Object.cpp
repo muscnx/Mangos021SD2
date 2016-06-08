@@ -327,7 +327,6 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
 
         if (m_objectTypeId == TYPEID_UNIT)
         {
-//删除代码修复npc返回原始坐标            if (moveFlags & MOVEFLAG_SPLINE_ENABLED)        // 0x00400000
             if (moveFlags & MOVEFLAG_SPLINE_ENABLED && ((Unit*)this)->movespline)        // 0x00400000//添加代码修复npc返回原始坐标
             {
                 Movement::PacketBuilder::WriteCreate((*((Unit*)this)->movespline), *data);

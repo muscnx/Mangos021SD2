@@ -105,10 +105,6 @@ Player* ObjectAccessor::FindPlayerByName(const char* name)
 void
 ObjectAccessor::SaveAllPlayers()
 {
-//É¾³ı´úÂëĞŞ¸´µ¼ÖÂ±ÀÀ£µÄgmÃüÁî    HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
-//É¾³ı´úÂëĞŞ¸´µ¼ÖÂ±ÀÀ£µÄgmÃüÁî    HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
-//É¾³ı´úÂëĞŞ¸´µ¼ÖÂ±ÀÀ£µÄgmÃüÁî    for (HashMapHolder<Player>::MapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-//É¾³ı´úÂëĞŞ¸´µ¼ÖÂ±ÀÀ£µÄgmÃüÁî        { itr->second->SaveToDB(); }
    SessionMap const& smap = sWorld.GetAllSessions();//Ìí¼Ó´úÂëĞŞ¸´µ¼ÖÂ±ÀÀ£µÄgmÃüÁî
    SessionMap::const_iterator iter;//Ìí¼Ó´úÂëĞŞ¸´µ¼ÖÂ±ÀÀ£µÄgmÃüÁî
    for (iter = smap.begin(); iter != smap.end(); ++iter){//Ìí¼Ó´úÂëĞŞ¸´µ¼ÖÂ±ÀÀ£µÄgmÃüÁî

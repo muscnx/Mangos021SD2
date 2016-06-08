@@ -795,14 +795,9 @@ bool GameObject::IsVisibleForInState(Player const* u, WorldObject const* viewPoi
             { return false; }
 
         // special invisibility cases
-//É¾³ı´úÂëĞŞ¸´Õì²âÏİÚå        /* TODO: implement trap stealth, take look at spell 2836
-//É¾³ı´úÂëĞŞ¸´Õì²âÏİÚå        if(GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && GetGOInfo()->trap.stealthed && u->IsHostileTo(GetOwner()))
         // implementing armed trap stealth, basing on the spell 2836 structure//Ìí¼Ó´úÂëĞŞ¸´Õì²âÏİÚå
         if (GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && GetGOInfo()->trap.stealthed && GetGoState() == GO_STATE_READY)//Ìí¼Ó´úÂëĞŞ¸´Õì²âÏİÚå
         {
-//É¾³ı´úÂëĞŞ¸´Õì²âÏİÚå            if(check stuff here)
-//É¾³ı´úÂëĞŞ¸´Õì²âÏİÚå                return false;
-//É¾³ı´úÂëĞŞ¸´Õì²âÏİÚå        }*/
             Unit *owner = GetOwner();//Ìí¼Ó´úÂëĞŞ¸´Õì²âÏİÚå
             if (!owner || u->IsHostileTo(owner))//Ìí¼Ó´úÂëĞŞ¸´Õì²âÏİÚå
             {//Ìí¼Ó´úÂëĞŞ¸´Õì²âÏİÚå
@@ -815,9 +810,6 @@ bool GameObject::IsVisibleForInState(Player const* u, WorldObject const* viewPoi
                     visibleDistance = 0.0f; // minimal detection distance, will be normalized below//Ìí¼Ó´úÂëĞŞ¸´Õì²âÏİÚå
                 }//Ìí¼Ó´úÂëĞŞ¸´Õì²âÏİÚå
 
-//É¾³ı´úÂëĞŞ¸´Õì²âÏİÚå        // Smuggled Mana Cell required 10 invisibility type detection/state
-//É¾³ı´úÂëĞŞ¸´Õì²âÏİÚå        if (GetEntry() == 187039 && ((u->m_detectInvisibilityMask | u->m_invisibilityMask) & (1 << 10)) == 0)
-//É¾³ı´úÂëĞŞ¸´Õì²âÏİÚå            { return false; }
                 if (owner)//Ìí¼Ó´úÂëĞŞ¸´Õì²âÏİÚå
                 {//Ìí¼Ó´úÂëĞŞ¸´Õì²âÏİÚå
                     // apply to the "owner" and "u" the rules for usual stealth detection; the fragment is taken from Unit::IsVisibleForOrDetect//Ìí¼Ó´úÂëĞŞ¸´Õì²âÏİÚå
@@ -846,8 +838,6 @@ bool GameObject::IsVisibleForInState(Player const* u, WorldObject const* viewPoi
     }
 
     // check distance
-//É¾³ı´úÂëĞŞ¸´Õì²âÏİÚå    return IsWithinDistInMap(viewPoint, GetMap()->GetVisibilityDistance() +
-//É¾³ı´úÂëĞŞ¸´Õì²âÏİÚå                             (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
     return IsWithinDistInMap(viewPoint, visibleDistance, false);//Ìí¼Ó´úÂëĞŞ¸´Õì²âÏİÚå
 }
 

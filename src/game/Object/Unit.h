@@ -593,14 +593,11 @@ enum MovementFlags
     MOVEFLAG_FALLING = 0x00002000,
     MOVEFLAG_FALLINGFAR = 0x00004000,
     MOVEFLAG_SWIMMING = 0x00200000,               // appears with fly flag also
-//删除代码修复npc返回原始坐标    MOVEFLAG_ASCENDING = 0x00400000,               // [-ZERO] is it really need and correct value
     MOVEFLAG_SPLINE_ENABLED = 0x00400000,//添加代码修复npc返回原始坐标
     MOVEFLAG_CAN_FLY = 0x00800000,               // [-ZERO] is it really need and correct value
     MOVEFLAG_FLYING = 0x01000000,               // [-ZERO] is it really need and correct value
 
     MOVEFLAG_ONTRANSPORT = 0x02000000,               // Used for flying on some creatures
-//删除代码修复npc返回原始坐标    MOVEFLAG_SPLINE_ELEVATION = 0x04000000,               // used for flight paths
-//删除代码修复npc返回原始坐标    MOVEFLAG_SPLINE_ENABLED = 0x08000000,               // used for flight paths
     MOVEFLAG_SPLINE_ELEVATION = 0x04000000,               // [-ZERO] checkme! used for flight paths//添加代码修复npc返回原始坐标
     //MOVEFLAG_SPLINE_ENABLED = 0x08000000,               // [-ZERO] wrong!//添加代码修复npc返回原始坐标
     MOVEFLAG_WATERWALKING = 0x10000000,               // prevent unit from falling through water

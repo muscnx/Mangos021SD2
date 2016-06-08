@@ -682,9 +682,9 @@ class Creature : public Unit
         Player* GetLootRecipient() const;                   // use group cases as prefered
         Group* GetGroupLootRecipient() const;
         bool IsTappedBy(Player const* player) const;
-        bool IsDamageEnoughForLootingAndReward() const { return m_PlayerDamageReq == 0; }//添加掉落修复50%伤害掉落
-        void LowerPlayerDamageReq(uint32 unDamage);//添加掉落修复50%伤害掉落
-        void ResetPlayerDamageReq() { m_PlayerDamageReq = GetHealth() / 2; }//添加掉落修复50%伤害掉落
+        bool IsDamageEnoughForLootingAndReward() const { return m_PlayerDamageReq == 0; }//添加代码修复伤害超过50%才有掉落
+        void LowerPlayerDamageReq(uint32 unDamage);//添加代码修复伤害超过50%才有掉落
+        void ResetPlayerDamageReq() { m_PlayerDamageReq = GetHealth() / 2; }//添加代码修复伤害超过50%才有掉落
 
         /**
         * function indicating whether the whether the creature has a looter recipient defined (either a group ID, either a player GUID).
@@ -732,7 +732,6 @@ class Creature : public Unit
 
         bool IsVisibleInGridForPlayer(Player* pl) const override;
 
-//删除代码修复驯化稀有宠物宕机        void RemoveCorpse();
         void RemoveCorpse(bool inPlace = false);//添加代码修复驯化稀有宠物宕机
         bool IsDeadByDefault() const { return m_IsDeadByDefault; };
 
@@ -844,7 +843,7 @@ class Creature : public Unit
         MovementGeneratorType m_defaultMovementType;
         Cell m_currentCell;                                 // store current cell where creature listed
         uint32 m_equipmentId;
-        uint32 m_PlayerDamageReq;//添加代码修复50%伤害掉落
+        uint32 m_PlayerDamageReq;//添加代码修复伤害超过50%才有掉落
 
         // below fields has potential for optimization
         bool m_AlreadyCallAssistance;

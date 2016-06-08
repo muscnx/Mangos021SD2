@@ -2967,18 +2967,11 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
 
     Unit* target = GetTarget();
 
-//É¾³ý´íÎóµÄ´úÂë    switch (GetId())
     if (apply) //Ìí¼Ó´úÂëÐÞ¸´Í¼ÌÚ
     {
         switch (GetId()) //Ìí¼Ó´úÂëÐÞ¸´Í¼ÌÚ
         { //Ìí¼Ó´úÂëÐÞ¸´Í¼ÌÚ
             // some spell have charges by functionality not have its in spell data
-//É¾³ý´íÎóµÄ´úÂë        case 28200:                                         // Ascendance (Talisman of Ascendance trinket)
-//É¾³ý´íÎóµÄ´úÂë            if (apply)
-//É¾³ý´íÎóµÄ´úÂë                { GetHolder()->SetAuraCharges(6); }
-//É¾³ý´íÎóµÄ´úÂë            break;
-//É¾³ý´íÎóµÄ´úÂë        default:
-//É¾³ý´íÎóµÄ´úÂë            break;
             case 28200:                                    // Ascendance (Talisman of Ascendance trinket) //Ìí¼Ó´úÂëÐÞ¸´Í¼ÌÚ
                 GetHolder()->SetAuraCharges(6); //Ìí¼Ó´úÂëÐÞ¸´Í¼ÌÚ
                 break; //Ìí¼Ó´úÂëÐÞ¸´Í¼ÌÚ
@@ -3510,7 +3503,6 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
                 {
                     if (int32(target->GetHealth()) > m_modifier.m_amount)
                         { target->ModifyHealth(-m_modifier.m_amount); }
-//É¾³ý´úÂëÐÞ¸´1hpÎÊÌâ                    else
                     else if (int32(target->GetHealth()) > 0)//Ìí¼Ó´úÂëÐÞ¸´1hpÎÊÌâ
 	                        { target->SetHealth(1); }
                     target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
@@ -4114,7 +4106,6 @@ void Aura::HandleShapeshiftBoosts(bool apply)
         Unit::SpellAuraHolderMap& tAuras = target->GetSpellAuraHolderMap();
         for (Unit::SpellAuraHolderMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
         {
-//É¾³ý´íÎóµÄ´úÂë            if (itr->second->IsRemovedOnShapeLost() || itr->second->GetSpellProto()->Id == 24864)   // Feline Swiftness Passive 2a
             if ((itr->second->IsRemovedOnShapeLost() && itr->second->GetSpellProto()->Id != 12292) || itr->second->GetSpellProto()->Id == 24864)   // Feline Swiftness Passive 2a drop, Sweeping Strikes keep TODO //Ìí¼Ó´úÂëÐÞ¸´Õ½Ê¿×ËÌ¬×ª»»Ê±¹â»·¶ªÊ§µÄÎÊÌâ
             {
                 target->RemoveAurasDueToSpell(itr->second->GetId());

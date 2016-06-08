@@ -1894,7 +1894,6 @@ void Spell::EffectEnergize(SpellEffectIndex eff_idx)
     switch (m_spellInfo->Id)
     {
         case 9512:                                          // Restore Energy
-//删除错误的代码修复菊花茶恢复能量值            level_diff = m_caster->getLevel() - 40;
             level_diff = m_caster->getLevel() - 60;//添加错误的代码修复菊花茶恢复能量值
             level_multiplier = 2;
             break;
@@ -3128,16 +3127,6 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
 
     switch (m_spellInfo->SpellFamilyName)
     {
-//删除错误的代码修复骑士审判等技能        case SPELLFAMILY_GENERIC:
-//删除错误的代码修复骑士审判等技能        {
-//删除错误的代码修复骑士审判等技能            // Seal of Command - receive benefit from Spell Damage and Healing
-//删除错误的代码修复骑士审判等技能            if (m_spellInfo->Id == 20424)
-//删除错误的代码修复骑士审判等技能            {
-//删除错误的代码修复骑士审判等技能                spell_bonus = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, spell_bonus, SPELL_DIRECT_DAMAGE);
-//删除错误的代码修复骑士审判等技能                spell_bonus = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, spell_bonus, SPELL_DIRECT_DAMAGE);
-//删除错误的代码修复骑士审判等技能            }
-//删除错误的代码修复骑士审判等技能            break;
-//删除错误的代码修复骑士审判等技能        }
         case SPELLFAMILY_ROGUE:
         {
             // Ambush
@@ -4404,9 +4393,7 @@ void Spell::EffectAddExtraAttacks(SpellEffectIndex /*eff_idx*/)
         { return; }
 
     if (unitTarget->m_extraAttacks)
-//删除错误的代码        { return; }
 
-//删除错误的代码    unitTarget->m_extraAttacks = damage;
     { //添加代码修复骑士清算
         if (m_spellInfo->Id == 20178 && unitTarget->m_extraAttacks < 4) //添加代码修复骑士清算
             ++unitTarget->m_extraAttacks;   // += damage would be more logical //添加代码修复骑士清算
@@ -4833,20 +4820,12 @@ void Spell::EffectDispelMechanic(SpellEffectIndex eff_idx)
 
 void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
 {
-//删除错误的代码修复猎人召唤死亡的宠物    if (m_caster->GetTypeId() != TYPEID_PLAYER)
     Player* _player = m_caster->ToPlayer();//添加代码修复猎人召唤死亡的宠物
 
     if (!_player || damage < 0)//添加代码修复猎人召唤死亡的宠物
 
 		        { return; }
-//删除错误的代码修复猎人召唤死亡的宠物    Player* _player = (Player*)m_caster;
     Pet* pet = _player->GetPet();
-//删除错误的代码修复猎人召唤死亡的宠物    if (!pet)
-//删除错误的代码修复猎人召唤死亡的宠物        { return; }
-//删除错误的代码修复猎人召唤死亡的宠物    if (pet->IsAlive())
-//删除错误的代码修复猎人召唤死亡的宠物        { return; }
-//删除错误的代码修复猎人召唤死亡的宠物    if (damage < 0)
-//删除错误的代码修复猎人召唤死亡的宠物        { return; }
 
     bool hadPet = true;//添加代码修复猎人召唤死亡的宠物
 

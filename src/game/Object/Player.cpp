@@ -1531,7 +1531,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             SendTransferAbortedByLockStatus(mEntry, lockStatus, miscRequirement);
             return false;
         }
-//删除错误的代码修复复活只能在副本        if (IsDead())   // rare case of teleporting the player into an instance with no areatrigger participation
         if (IsDead() && mEntry->IsDungeon())    // rare case of teleporting the player into an instance with no areatrigger participation//添加代码修复复活只能在副本
         {
             ResurrectPlayer(0.5f);
@@ -1577,8 +1576,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         if (!(options & TELE_TO_NOT_UNSUMMON_PET))
         {
             // same map, only remove pet if out of range for new position
-//删除错误的代码修复猎人召唤死亡的宠物            if (pet && !pet->IsWithinDist3d(x, y, z, GetMap()->GetVisibilityDistance()))
-//删除错误的代码修复猎人召唤死亡的宠物                { UnsummonPetTemporaryIfAny(); }
             if (pet)//添加代码修复猎人召唤死亡的宠物
             {//添加代码修复猎人召唤死亡的宠物
                 if (!pet->IsWithinDist3d(x, y, z, GetMap()->GetVisibilityDistance()))//添加代码修复猎人召唤死亡的宠物
@@ -1658,7 +1655,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             // remove pet on map change
             if (pet)
-//删除错误的代码修复猎人召唤死亡的宠物                { UnsummonPetTemporaryIfAny(); }
             {//添加代码修复猎人召唤死亡的宠物
                 if (pet->IsAlive())//添加代码修复猎人召唤死亡的宠物
                 {//添加代码修复猎人召唤死亡的宠物
@@ -4748,7 +4744,6 @@ float Player::GetTotalBaseModValue(BaseModGroup modGroup) const
 
 uint32 Player::GetShieldBlockValue() const
 {
-//删除错误的代码    float value = (m_auraBaseMod[SHIELD_BLOCK_VALUE][FLAT_MOD] + GetStat(STAT_STRENGTH) / 20 - 1) * m_auraBaseMod[SHIELD_BLOCK_VALUE][PCT_MOD];
     float value = (m_auraBaseMod[SHIELD_BLOCK_VALUE][FLAT_MOD] + GetStat(STAT_STRENGTH) / 0.5f - 10) * m_auraBaseMod[SHIELD_BLOCK_VALUE][PCT_MOD]; //添加代码强化盾牌格挡
 
 
@@ -14068,8 +14063,6 @@ bool Player::IsTappedByMeOrMyGroup(Creature* creature)
  * Called from Object::BuildValuesUpdate */
 bool Player::isAllowedToLoot(Creature* creature)
 {
-//删除代码修复50%伤害    /* Nobody tapped the monster (solo kill by another NPC) */
-//删除代码修复50%伤害    if (!creature->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED))
     /* Nobody tapped the monster (kill either solo or mostly by another NPC) *///添加代码修复50%伤害掉落
     if (!creature->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED) || !creature->IsDamageEnoughForLootingAndReward())//添加代码修复50%伤害掉落
 	        { return false; }

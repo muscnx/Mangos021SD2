@@ -1143,7 +1143,7 @@ void CreatureEventAI::EnterEvadeMode()
         if (i->Event.event_type == EVENT_T_EVADE)
             { ProcessEvent(*i); }
     }
-    m_creature->ResetPlayerDamageReq();//添加代码修复50%伤害掉落
+    m_creature->ResetPlayerDamageReq();//添加代码修复伤害超过50%才有掉落
 }
 
 void CreatureEventAI::JustDied(Unit* killer)

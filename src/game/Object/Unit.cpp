@@ -259,7 +259,6 @@ Unit::Unit() :
     m_modMeleeHitChance = 0.0f;
     m_modRangedHitChance = 0.0f;
     m_modSpellHitChance = 0.0f;
-//删除错误的代码    m_baseSpellCritChance = 5;
     m_baseSpellCritChance = 0; //添加代码修复图腾错误
 
     m_CombatTimer = 0;
@@ -632,8 +631,6 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             { SetContestedPvP(attackedPlayer); }
     }
 
-//删除代码修复50%伤害    if (pVictim->GetTypeId() == TYPEID_UNIT && !((Creature*)pVictim)->IsPet() && !((Creature*)pVictim)->HasLootRecipient())
-//删除代码修复50%伤害        { ((Creature*)pVictim)->SetLootRecipient(this); }
     if (Creature* victim = pVictim->ToCreature())//添加代码修复50%伤害掉落
     {//添加代码修复50%伤害掉落
         if (!victim->IsPet() && !victim->HasLootRecipient())//添加代码修复50%伤害掉落
@@ -703,29 +700,22 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         {
             player_tap->ProcDamageAndSpell(pVictim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0);
 
-//删除代码修复50%伤害掉落            WorldPacket data(SMSG_PARTYKILLLOG, (8 + 8));   // send event PARTY_KILL
-//删除代码修复50%伤害掉落            data << player_tap->GetObjectGuid();            // player with killing blow
-//删除代码修复50%伤害掉落            data << pVictim->GetObjectGuid();               // victim
             if (isRewardAllowed)//添加代码修复50%伤害掉落
             {//添加代码修复50%伤害掉落
                 WorldPacket data(SMSG_PARTYKILLLOG, (8 + 8));   // send event PARTY_KILL//添加代码修复50%伤害掉落
                 data << player_tap->GetObjectGuid();            // player with killing blow//添加代码修复50%伤害掉落
                 data << pVictim->GetObjectGuid();               // victim//添加代码修复50%伤害掉落
 
-//删除代码修复50%伤害掉落            if (group_tap)
-//删除代码修复50%伤害掉落                { group_tap->BroadcastPacket(&data, false, group_tap->GetMemberGroup(player_tap->GetObjectGuid()), player_tap->GetObjectGuid()); }
                 if (group_tap)//添加代码修复50%伤害掉落
                 {//添加代码修复50%伤害掉落
                     group_tap->BroadcastPacket(&data, false, group_tap->GetMemberGroup(player_tap->GetObjectGuid()), player_tap->GetObjectGuid());//添加代码修复50%伤害掉落
                 }//添加代码修复50%伤害掉落
 
-//删除代码修复50%伤害掉落            player_tap->SendDirectMessage(&data);
                 player_tap->SendDirectMessage(&data);//添加代码修复50%伤害掉落
             }//添加代码修复50%伤害掉落
         }
 
         // Reward player, his pets, and group/raid members
-//删除代码修复50%伤害掉落        if (player_tap != pVictim)
         if (isRewardAllowed && player_tap != pVictim)//添加代码修复50%伤害掉落
         {
             if (group_tap)
@@ -1371,8 +1361,6 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
         case SPELL_DAMAGE_CLASS_MELEE:
         {
             // Calculate damage bonus
-//删除错误的代码修复骑士审判等技能的伤害加成            damage = MeleeDamageBonusDone(pVictim, damage, attackType, spellInfo, SPELL_DIRECT_DAMAGE);
-//删除错误的代码修复骑士审判等技能的伤害加成            damage = pVictim->MeleeDamageBonusTaken(this, damage, attackType, spellInfo, SPELL_DIRECT_DAMAGE);
             switch (spellInfo->Id) //修复骑士审判等技能的伤害加成
             { //修复骑士审判等技能的伤害加成
                 // Paladin //修复骑士审判等技能的伤害加成
@@ -5578,10 +5566,8 @@ int32 Unit::SpellBonusWithCoeffs(Unit* pCaster, SpellEntry const* spellProto, in
     else 
         { coeff = CalculateDefaultCoefficient(spellProto, damagetype); }
 
-//删除错误的代码修复骑士圣光收益太低    float LvlPenalty = CalculateLevelPenalty(spellProto);
     float LvlPenalty = CalculateLevelPenalty(spellProto); //修复骑士圣光收益过低
     //float LvlPenalty = CalculateLevelPenalty(spellProto);//[-ZERO] not need. http://wowwiki.wikia.com/wiki/Patch_2.0.1//添加代码修复低等级技能收益太低
-//删除代码修复低等级技能收益太低    float LvlPenalty = 1.0f;//添加代码修复低等级技能收益太低
 
     // Holy Light and Seal of Righteousness PROC and Flash of Light receive benefit from Spell Damage and Healing too low. //修复骑士圣光收益过低
     if (spellProto->SpellFamilyName == SPELLFAMILY_PALADIN && (spellProto->SpellIconID == 25 || spellProto->SpellIconID == 70 || spellProto->SpellIconID == 242)) //修复骑士圣光收益过低
@@ -6644,8 +6630,6 @@ void Unit::ClearInCombat()
         if (cThis->GetCreatureInfo()->UnitFlags & UNIT_FLAG_OOC_NOT_ATTACKABLE && !(cThis->GetTemporaryFactionFlags() & TEMPFACTION_TOGGLE_OOC_NOT_ATTACK))
             { SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE); }
 
-//删除错误的代码修复脱战机制        if (cThis->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED))//添加代码修改脱战机制
-//删除错误的代码修复脱战机制            { RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED); }//添加代码修改脱战机制
 
         clearUnitState(UNIT_STAT_ATTACK_PLAYER);
     }
@@ -7484,7 +7468,6 @@ bool Unit::SelectHostileTarget()
     }
 
     // no target but something prevent go to evade mode
-//删除代码修复假战斗状态逃避    if (!IsInCombat() || HasAuraType(SPELL_AURA_MOD_TAUNT))
     if (!IsInCombat() || HasAuraType(SPELL_AURA_MOD_TAUNT) || m_dummyCombatState)//添加代码修复假战斗状态逃避
 	        { return false; }
 

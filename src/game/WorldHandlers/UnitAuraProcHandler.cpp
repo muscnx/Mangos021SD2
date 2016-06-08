@@ -237,10 +237,6 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit* pVictim, SpellAuraHolder* holder, S
 {
     SpellEntry const* spellProto = holder->GetSpellProto();
 
-//É¾³ý´úÂëÐÞ¸´·¨Ê¦±ù»·Â©¹Ö    // early check to prevent FrostNova damage to remove Aura 26//Ìí¼Ó´úÂëÐÞ¸´·¨Ê¦±ù»·Â©¹Ö
-//É¾³ý´úÂëÐÞ¸´·¨Ê¦±ù»·Â©¹Ö    if (procSpell && (procSpell->Id == spellProto->Id) && (spellProto->SpellIconID == 193) &&//Ìí¼Ó´úÂëÐÞ¸´·¨Ê¦±ù»·Â©¹Ö
-//É¾³ý´úÂëÐÞ¸´·¨Ê¦±ù»·Â©¹Ö        (spellProto->SpellVisual == 17) && (spellProto->SpellFamilyName == SPELLFAMILY_MAGE))//Ìí¼Ó´úÂëÐÞ¸´·¨Ê¦±ù»·Â©¹Ö
-//É¾³ý´úÂëÐÞ¸´·¨Ê¦±ù»·Â©¹Ö        return false;//Ìí¼Ó´úÂëÐÞ¸´·¨Ê¦±ù»·Â©¹Ö
 
     // Get proc Event Entry
     spellProcEvent = sSpellMgr.GetSpellProcEvent(spellProto->Id);

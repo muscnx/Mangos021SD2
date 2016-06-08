@@ -150,7 +150,6 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_AlreadyCallAssistance(false), m_AlreadySearchedAssistance(false),
     m_AI_locked(false), m_IsDeadByDefault(false), m_temporaryFactionFlags(TEMPFACTION_NONE),
     m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_originalEntry(0),
-//删除错误代码修复50%伤害才有掉落    m_creatureInfo(NULL)
     m_creatureInfo(NULL), m_PlayerDamageReq(0)//添加代码修复50%伤害才有掉落
 {
     /* Loot data */
@@ -214,15 +213,8 @@ void Creature::RemoveFromWorld()
     Unit::RemoveFromWorld();
 }
 
-//删除错误的代码修复驯化稀有宠物宕机void Creature::RemoveCorpse()
 void Creature::RemoveCorpse(bool inPlace)//添加代码修复驯化稀有宠物宕机
 {
-//删除错误的代码修复驯化稀有宠物宕机    // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
-//删除错误的代码修复驯化稀有宠物宕机    if (uint16 poolid = sPoolMgr.IsPartOfAPool<Creature>(GetGUIDLow()))
-//删除错误的代码修复驯化稀有宠物宕机        { sPoolMgr.UpdatePool<Creature>(*GetMap()->GetPersistentState(), poolid, GetGUIDLow()); }
-
-//删除错误的代码修复驯化稀有宠物宕机    if (!IsInWorld())                            // can be despawned by update pool
-//删除错误的代码修复驯化稀有宠物宕机        { return; }
     if (!inPlace)//添加代码修复驯化稀有宠物宕机
     {//添加代码修复驯化稀有宠物宕机
         // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless//添加代码修复驯化稀有宠物宕机
@@ -1343,11 +1335,11 @@ float Creature::_GetDamageMod(int32 Rank)
     }
 }
 
-void Creature::LowerPlayerDamageReq(uint32 unDamage)//添加代码修复50%掉落
-{//添加代码修复50%掉落
-    if (m_PlayerDamageReq)//添加代码修复50%掉落
-        m_PlayerDamageReq > unDamage ? m_PlayerDamageReq -= unDamage : m_PlayerDamageReq = 0;//添加代码修复50%掉落
-}//添加代码修复50%掉落
+void Creature::LowerPlayerDamageReq(uint32 unDamage)//添加代码修复伤害超过50%才有掉落
+{//添加代码修复伤害超过50%才有掉落
+    if (m_PlayerDamageReq)//添加代码修复伤害超过50%才有掉落
+        m_PlayerDamageReq > unDamage ? m_PlayerDamageReq -= unDamage : m_PlayerDamageReq = 0;//添加代码修复伤害超过50%才有掉落
+}//添加代码修复伤害超过50%才有掉落
 
 float Creature::_GetSpellDamageMod(int32 Rank)
 {
@@ -1665,7 +1657,7 @@ void Creature::SetDeathState(DeathState s)
         // Dynamic flags must be set on Tapped by default.
         SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
         LoadCreatureAddon(true);
-        ResetPlayerDamageReq();//添加代码修复50%掉落
+        ResetPlayerDamageReq();//添加代码修复伤害超过50%才有掉落
 
         // Flags after LoadCreatureAddon. Any spell in *addon
         // will not be able to adjust these.
@@ -1707,7 +1699,6 @@ void Creature::ForcedDespawn(uint32 timeMSToDespawn)
     if (IsAlive())
         { SetDeathState(JUST_DIED); }
 
-//删除代码修复驯化稀有宠物宕机    RemoveCorpse();
     RemoveCorpse(true);                                     // force corpse removal in the same grid//添加代码修复驯化稀有宠物宕机
 
     SetHealth(0);                                           // just for nice GM-mode view

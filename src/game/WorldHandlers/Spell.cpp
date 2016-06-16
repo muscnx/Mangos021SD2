@@ -5088,6 +5088,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (BattleGround const* bg = ((Player*)m_caster)->GetBattleGround())
                         if (bg->GetStatus() != STATUS_IN_PROGRESS)
                             return SPELL_FAILED_TRY_AGAIN;
+                    //The Undercity Not to be used.//添加代码临时禁止在幽暗城使用闪现技能
+                    if (m_caster->GetAreaId() == 1497 && m_spellInfo->Id == 1953)//添加代码临时禁止在幽暗城使用闪现技能
+                        return SPELL_FAILED_TRY_AGAIN;//添加代码临时禁止在幽暗城使用闪现技能
                 }
 
                 break;
